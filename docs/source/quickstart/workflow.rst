@@ -220,7 +220,7 @@ Command Line Plotting
 
         dlt-plot -f training.csv --tail 10 --head 5
  
-There are more available flags (log axes, setting titles, labels etc).
+There are more available flags (logarithmic axes, setting titles, labels etc).
 For more information:
 
 .. code-block:: bash
