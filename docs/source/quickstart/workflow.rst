@@ -164,61 +164,61 @@ Command Line Plotting
 
 - Live update using the '-r'/'--refresh' flag (seconds). 
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f training.csv -r 5
+        dlt-plot -f training.csv -r 5
 
 - Select columns using their number or name after the file.
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f averages.csv train_loss val_loss
+        dlt-plot -f averages.csv train_loss val_loss
 
 - Plot multiple files/columns. This will plot columns 0 and 3 from file_1.csv
   and column 4 from file_2.csv
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f file_1.csv 0 3 -f file_2.csv 4 
+        dlt-plot -f file_1.csv 0 3 -f file_2.csv 4 
 
 - Select the first/last points to plot using '--head'/'--tail' (or remove using
   '--rhead'/'--rtail).
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f data.csv --head 100
+        dlt-plot -f data.csv --head 100
 
 - Average/Variance every <N> points using '--sub_avg'/'--sub_var'.
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f training.csv --sub_avg 10
+        dlt-plot -f training.csv --sub_avg 10
 
 - Moving Average/Variance every <N> points using '--mov_avg'/'--mov_var'.
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f training.csv --mov_avg 10
+        dlt-plot -f training.csv --mov_avg 10
 
 - If multiple columns, files are used then the settings can be set for each
   individual column. This will sub_avg training by 1000 and validation by 100:
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f training.csv -f validation.csv --sub_avg 1000 100
+        dlt-plot -f training.csv -f validation.csv --sub_avg 1000 100
 
 - NOTE: Transformations are applied in the order they are encountered. E.g. this
   will plot points 5-10:
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f training.csv --head 10 --tail 5
+        dlt-plot -f training.csv --head 10 --tail 5
 
   whereas this will plot points end-10 to end-5:
 
-.. code-block:: bash
+    .. code-block:: bash
 
-    dlt-plot -f training.csv --tail 10 --head 5
+        dlt-plot -f training.csv --tail 10 --head 5
  
 There are more available flags (log axes, setting titles, labels etc).
 For more information:
