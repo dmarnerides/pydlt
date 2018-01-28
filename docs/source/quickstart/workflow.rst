@@ -10,7 +10,7 @@ Workflow Quickstart
 Logging
 ------------------------
 
-Use the :class:`dlt.util.Logger` to create CSV logs.
+:class:`dlt.util.Logger` can be used to create CSV logs.
 
 .. code-block:: python3
 
@@ -20,7 +20,7 @@ Use the :class:`dlt.util.Logger` to create CSV logs.
 Command Line Plotting
 ------------------------
 
-Use :ref:`plot-doc` from the command line to plot CSV files. The '-r' flag is
+:ref:`plot-doc` can be used from the command line to plot CSV files. The '-r' flag is
 the refresh rate in seconds. 
 
 .. code-block:: bash
@@ -43,7 +43,7 @@ There are more available flags. For more information use:
 Checkpointing
 ------------------------
 
-Use the :class:`dlt.util.Checkpointer` to create checkpoints for any
+:class:`dlt.util.Checkpointer` can be used to create checkpoints for any
 (torch serializable) objects.
 
 .. code-block:: python3
@@ -181,7 +181,7 @@ The following is a configuration file template with the default values:
 Dispatching
 ------------------------
 
-Use :ref:`dispatch-doc` from the command line to create a self contained
+:ref:`dispatch-doc` can be used from the command line to create a self contained
 experiment in a directory. Useful for saving snapshots of code that is likely
 to change.
 

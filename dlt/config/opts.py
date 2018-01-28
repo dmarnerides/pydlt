@@ -25,7 +25,7 @@ def print_opts(opt):
     print(bar)
 
 def make_subsets(subsets):
-    """Use to split option categories into subsets.
+    """Splits command line argument categories into subsets.
     
     The subset names are appended at the end of each of the categories options
     after an underscore. For example the dataset category can be split into 
@@ -48,7 +48,7 @@ def make_subsets(subsets):
     parse.subsets = subsets
 
 def add_extras(extras):
-    """Use to add extra options for the parser, in addition to the built-in ones.
+    """Adds extra options for the parser, in addition to the built-in ones.
 
     Args:
         extras (list or dict, optional): Extra command line arguments to parse.

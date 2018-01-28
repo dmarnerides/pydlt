@@ -25,7 +25,7 @@ The following commonly used packages have their own default **view** for images:
 ``Type and View Conversions``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Use :func:`dlt.util.change_view` to convert between views. Please see the
+:func:`dlt.util.change_view` can be used to convert between views. Please see the
 documentation for available views.
 
 .. code-block:: python3
@@ -65,7 +65,7 @@ Displaying
 ``imshow``
 ~~~~~~~~~~~~~~~
 
-Use :func:`dlt.viz.imshow` to display images. Accepts Arrays and Tensors as 
+:func:`dlt.viz.imshow` can be used to display images. Accepts Arrays and Tensors as 
 well as different views. The view must be provided as an argument.
 
 .. code-block:: python3
@@ -80,7 +80,7 @@ well as different views. The view must be provided as an argument.
 ``make_grid``
 ~~~~~~~~~~~~~
 
-Use :func:`dlt.util.make_grid` to create grids. It can accept mixed lists of
+:func:`dlt.util.make_grid` can be used to create grids. It can accept mixed lists of
 Arrays, Tensors and Variables, as well as different sized images (as long as
 they have the same view).
 
