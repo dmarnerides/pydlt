@@ -1,3 +1,8 @@
+.. image:: https://readthedocs.org/projects/pydlt/badge/?version=latest
+    :target: http://pydlt.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+                
+
 Deep Learning Toolbox for PyTorch
 =====================================
 
