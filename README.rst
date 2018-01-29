@@ -32,7 +32,7 @@ Features include:
     opt = dlt.config.parse() # Has built in options (can add extra)
     print('Some Settings: ', opt.experiment_name, opt.batch_size, opt.lr)
 
-- Parser compatible functions and configuration files support.
+- Configuration files support and parser compatible functions.
 
 .. code:: bash
 
