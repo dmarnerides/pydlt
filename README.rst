@@ -15,9 +15,10 @@ Documentation is available here_.
 
 .. _here: http://pydlt.readthedocs.io/
 
-Features include:
+Features
+-----------------
 
-- Trainers (currently Vanilla, VanillaGAN, WGAN-GP, BEGAN, FisherGAN)
+- **Trainers** (currently Vanilla, VanillaGAN, WGAN-GP, BEGAN, FisherGAN)
 
 .. code:: python3
 
@@ -25,28 +26,28 @@ Features include:
     for batch, (prediction, losses) in trainer(data_loader):
         # Training happens in the iterator and relevant results are returned for each step
 
-- Built in configurable parser with arguments.
+- Built in configurable **parser** with arguments.
 
 .. code:: python3
 
     opt = dlt.config.parse() # Has built in options (can add extra)
     print('Some Settings: ', opt.experiment_name, opt.batch_size, opt.lr)
 
-- Configuration files support and parser compatible functions.
+- **Configuration files** support and parser compatible functions.
 
 .. code:: bash
 
     $ python main.py @settings.cfg
     Some Settings:  config_test 32 0.0001
 
-- HDR imaging support (.hdr, .exr, and .pfm formats)
+- **HDR imaging** support (.hdr, .exr, and .pfm formats)
 
 .. code:: python3
 
     img = dlt.hdr.imread('test.pfm')
     dlt.hdr.imwrite('test.exr', img)
 
-- Checkpointing of (torch serializable) objects; Network state dicts supported.
+- **Checkpointing** of (torch serializable) objects; Network state dicts supported.
 
 .. code:: python3
 
@@ -54,7 +55,7 @@ Features include:
     data_chkp.save(np.array([1,2,3]))
     a = data_chkp.load()
 
-- Image operations and easy conversions between multiple library views (torch, cv, plt)
+- **Image operations** and easy conversions between multiple library views (torch, cv, plt)
 
 .. code:: python3
 
@@ -62,7 +63,7 @@ Features include:
     dlt.viz.imshow(img, view='cv')  # Height x Width x Channels - RGB
     tensor_with_torch_view = cv2torch(img) # Channels x Height x Width - RGB
 
-- Easy visualization (and make_grid supporting Arrays, Tensors, Variables and lists)
+- Easy **visualization** (and make_grid supporting Arrays, Tensors, Variables and lists)
 
 .. code:: python3
 
@@ -78,20 +79,20 @@ Features include:
     dlt.viz.modules.forward_hook(net, [nn.Linear], tag='layer_outputs', histogram=False)
     net(Variable(torch.Tensor(3,10)))
 
-- CSV Logger.
+- CSV **Logger**.
 
 .. code:: python3
 
     log = dlt.util.Logger('losses', ['train_loss', 'val_loss'])
     log({'train_loss': 10, 'val_loss':20})
 
-- Command line tool for easy plotting of CSV files (with live updating).
+- Command line tool for easy **plotting** of CSV files (with live updating).
 
 .. code:: bash
 
     $ dlt-plot --file losses.csv train_loss val_loss --refresh 5 --loglog True --tail 100
 
-- A minimal Progress bar (with global on/off switch).
+- A minimal **Progress bar** (with global on/off switch).
 
 .. code:: python3
 
