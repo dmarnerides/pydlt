@@ -1,22 +1,13 @@
-.. image:: https://readthedocs.org/projects/pydlt/badge/?version=latest
-    :target: http://pydlt.readthedocs.io/en/latest/?badge=latest
-    :alt: Documentation Status
-                
+[![Documentation Status](https://readthedocs.org/projects/pydlt/badge/?version=latest)](http://pydlt.readthedocs.io/en/latest/?badge=latest)
 
-PyTorch Deep Learning Toolbox
-=====================================
+# PyTorch Deep Learning Toolbox
 
-PyDLT is a set of tools aimed to make experimenting with PyTorch_ easier 
-(than it already is).
+PyDLT is a set of tools aimed to make experimenting with [PyTorch](http://pytorch.org/)
+easier (than it already is).
 
-.. _PyTorch: http://pytorch.org/
+Documentation is available [here](http://pydlt.readthedocs.io/)
 
-Documentation is available here_.
-
-.. _here: http://pydlt.readthedocs.io/
-
-Features
------------------
+## Features
 
 - **Trainers** (currently Vanilla, VanillaGAN, WGAN-GP, BEGAN, FisherGAN)
 
@@ -34,7 +25,6 @@ print('Some Settings: ', opt.experiment_name, opt.batch_size, opt.lr)
 
 - **Configuration files** support and parser compatible functions.
 
-.. code:: bash
 ```bash
 $ python main.py @settings.cfg
 Some Settings:  config_test 32 0.0001
@@ -101,8 +91,7 @@ for batch in barit(loader, start='Loading'):
     pass
 ```
 
-Installation
----------------------
+## Installation
 
 Make sure you have PyTorch_ installed. OpenCV is also required:
 
@@ -110,16 +99,13 @@ Make sure you have PyTorch_ installed. OpenCV is also required:
 conda install -c menpo opencv
 ```
 
-conda install (recommended):
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+### conda install (recommended):
 
 ```bash
 conda install -c demetris pydlt
 ```
 
-From source:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### From source:
 
 ```bash
 git clone https://github.com/dmarnerides/pydlt.git
@@ -127,8 +113,7 @@ cd pydlt
 python setup.py install
 ```
 
-About
---------
+## About
 
 I created this toolbox while learning Python and PyTorch, after working with
 (Lua) Torch, to help speed up experiment prototyping.
@@ -137,7 +122,6 @@ If you notice something is wrong or missing please do a pull request or
 open up an issue.
 
 
-Contact
-----------
+## Contact
 
 Demetris Marnerides: dmarnerides@gmail.com
