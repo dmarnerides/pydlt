@@ -19,7 +19,7 @@ def save_image(img, title):
 def process_none(x):
     if x is None:
         x = []
-    elif not any((isinstance(x, x) for x in [list, tuple])):
+    elif not any((isinstance(x, y) for y in [list, tuple])):
         x = [x]
     return x
 
