@@ -200,8 +200,9 @@ Command Line Plotting
 
         dlt-plot -f training.csv --mov_avg 10
 
-- If multiple columns, files are used then the settings can be set for each
-  individual column. This will sub_avg training by 1000 and validation by 100:
+- If multiple columns/files are used then the settings can be set for each
+  individual column/file respectively. E.g. this will sub_avg training by 1000
+  and validation by 100:
 
     .. code-block:: bash
 
@@ -237,7 +238,7 @@ to change.
 
 .. code-block:: bash
     
-    dlt-dispatch experiment_name -d ~/experiments -m main.py -e settings.cfg
+    dlt-dispatch experiment_name -d ~/experiments -m main.py -c settings.cfg
 
 The above code will create a directory ~/experiments/experiment_name containg main.py
 and settings.cfg.
