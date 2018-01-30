@@ -51,6 +51,13 @@ else:
     discriminator = Discriminator(opt.num_hidden, size[0], size[1])
 disc_chkp = dlt.config.model_checkpointer(discriminator, subset='discriminator')
 
+# Cudafy
+if opt.use_gpu:
+    torch.cuda.set_device(opt.device)
+    torch.backends.cudnn.benchmark = opt.cudnn_benchmark
+    generator.cuda()
+    discriminator.cuda()
+
 # Optimizers
 g_optim = dlt.config.optimizer(generator, subset='generator')
 d_optim = dlt.config.optimizer(discriminator, subset='discriminator')
@@ -65,17 +72,14 @@ elif opt.gan_type == 'fishergan':
 else:
     trainer = GAN(generator, discriminator, g_optim, d_optim, opt.d_iter)
 
+if opt.use_gpu:
+    trainer.cuda() # Trainers might have buffers that need to be transferred to GPU
+
 # Logging
 log = dlt.util.Logger('training', trainer.loss_names_training(), opt.save_path)
 # epoch checkpoint
 epoch_chkp, current_epoch = dlt.config.epoch_checkpointer()
-# Cudafy
-if opt.use_gpu:
-    torch.cuda.set_device(opt.device)
-    torch.backends.cudnn.benchmark = opt.cudnn_benchmark
-    generator.cuda()
-    discriminator.cuda()
-    trainer.cuda()
+
 
 # Training loop
 for epoch in range(current_epoch, opt.max_epochs):
