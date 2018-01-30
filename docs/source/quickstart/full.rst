@@ -22,12 +22,12 @@ It is worth noting:
 
 **main.py**:
 
-.. literalinclude:: assets/main.py
+.. literalinclude:: ../../../examples/gans/main.py
 
 **models.py**:
 
-.. literalinclude:: assets/models.py
+.. literalinclude:: ../../../examples/gans/models.py
 
 **settings.cfg**:
 
-.. literalinclude:: assets/settings.cfg
+.. literalinclude:: ../../../examples/gans/settings.cfg
