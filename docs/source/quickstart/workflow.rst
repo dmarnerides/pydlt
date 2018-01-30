@@ -240,6 +240,6 @@ to change.
     
     dlt-dispatch experiment_name -d ~/experiments -m main.py -c settings.cfg
 
-The above code will create a directory ~/experiments/experiment_name containg main.py
-and settings.cfg.
+The above code will create a directory ~/experiments/experiment_name containg
+main.py, settings.cfg (along with a run.sh script).
 
