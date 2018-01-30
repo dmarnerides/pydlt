@@ -21,7 +21,7 @@ with open(version_py, 'w') as fh:
     fh.write(version_msg + os.linesep + "__version__ = \'" + version + '\'')
 
 
-readme = open('README.rst').read()
+readme = open('README.md').read()
 
 setup(name='dlt',
       version=version,
