@@ -21,6 +21,10 @@ build:
     - dlt-plot = dlt.viz.csvplot:plot_csv
     - dlt-dispatch = dlt.util.dispatch:dispatch
 
+test:
+  imports:
+    - dlt
+
 about:
   home: https://github.com/dmarnerides/pydlt
   license: BSD

@@ -192,7 +192,6 @@ def plot_csv(use_args=None):
 
     figure = plt.figure('viz')
     if opt.refresh is not None and opt.refresh > 0.0:
-        figure.show()
         while True:
             if not plt.fignum_exists('viz'):
                 exit()
