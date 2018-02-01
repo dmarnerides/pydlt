@@ -27,7 +27,7 @@ with open(version_py, 'w') as fh:
 readme = open('README.md').read()
 
 setup(name='dlt',
-      version=full_version,
+      version=version,
       description='Deep Learning Toolbox for PyTorch',
       long_description=readme,
       url='https://github.com/dmarnerides/pydlt',
