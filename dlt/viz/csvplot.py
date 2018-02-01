@@ -167,9 +167,15 @@ def plot_csv(use_args=None):
                     data.columns = names
                 data.plot(ax = axes, **plot_args)
             except:
-                figure.show()
+                if interactive:
+                    figure.draw()
+                else:
+                    figure.show()
         else:
-            figure.show()
+            if interactive:
+                figure.draw()
+            else:
+                figure.show()
         if is_array(axes):
             for i,a in enumerate(axes):
                 a.set_xlabel(opt_dict['xlabel'][i] if isinstance(opt_dict['xlabel'], list) else opt_dict['xlabel'] if opt_dict['xlabel'] is not None else 'x') 
