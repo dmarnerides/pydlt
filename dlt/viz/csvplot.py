@@ -1,4 +1,5 @@
 import os
+import time
 import argparse
 from collections import OrderedDict
 import numpy as np
@@ -168,12 +169,12 @@ def plot_csv(use_args=None):
                 data.plot(ax = axes, **plot_args)
             except:
                 if interactive:
-                    figure.draw()
+                    figure.canvas.flush_events()
                 else:
                     figure.show()
         else:
             if interactive:
-                figure.draw()
+                figure.canvas.flush_events()
             else:
                 figure.show()
         if is_array(axes):
@@ -191,12 +192,13 @@ def plot_csv(use_args=None):
 
     figure = plt.figure('viz')
     if opt.refresh is not None and opt.refresh > 0.0:
+        figure.show()
         while True:
             if not plt.fignum_exists('viz'):
                 exit()
             data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
             _do_plots(True, data, opt.names, opt.save, opt.display, figure)
-            plt.pause(opt.refresh)
+            time.sleep(opt.refresh)
     else:
         data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
         _do_plots(False, data, opt.names, opt.save, opt.display, figure)
