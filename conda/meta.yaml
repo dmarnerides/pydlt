@@ -6,6 +6,7 @@ package:
 
 source:
   git_url: https://github.com/dmarnerides/pydlt
+  git_rev: master
 
 requirements:
   build:
@@ -16,6 +17,7 @@ requirements:
 
 build:
   noarch: python
+  string: {{ environ.get('GIT_BUILD_STR', '') }}
   entry_points:
     - dlt-plot = dlt.viz.csvplot:plot_csv
     - dlt-dispatch = dlt.util.dispatch:dispatch
