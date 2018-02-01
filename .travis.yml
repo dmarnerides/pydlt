@@ -12,3 +12,6 @@ install:
 
 after_success:
   - test $TRAVIS_BRANCH = "master" && conda install conda-build && conda install anaconda-client && bash conda.recipe/conda_upload.sh
+
+script:
+  - echo hooray
