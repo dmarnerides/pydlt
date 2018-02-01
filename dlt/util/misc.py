@@ -103,8 +103,8 @@ def slide_window_(a, kernel, stride=None):
         return a
 
 # TODO: Add example
-def re_stride_(a, kernel, stride=None):
-    """Changes the stride of a tensor adding new dimension(s).
+def re_stride(a, kernel, stride=None):
+    """Returns a re-shaped and re-strided tensor/variable given a kernel.
 
     Args:
         a (Tensor): The Tensor to re-stride.
@@ -120,11 +120,7 @@ def re_stride_(a, kernel, stride=None):
     window_dim = len(kernel)
     new_shape = a.size()[:-window_dim]  + kernel + tuple(int(math.floor((s - kernel[i] )/stride[i]) + 1) for i,s in enumerate(a.size()[-window_dim:]))
     new_stride = a.stride()[:-window_dim]  + a.stride()[-window_dim:] + tuple(s*k for s,k in zip(a.stride()[-window_dim:], stride))
-    if is_variable(a):
-        a.data.set_(a.data.storage(), storage_offset=0, size=new_shape, stride=new_stride)
-    else:
-        a.set_(a.storage(), storage_offset=0, size=new_shape, stride=new_stride)
-    return a
+    return a.as_strided(new_shape, new_stride)
 
 
 def replicate(x, dim=-3, nrep=3):

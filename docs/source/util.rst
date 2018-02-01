@@ -72,10 +72,10 @@ Tensor/Array Operations
 
 .. autofunction:: slide_window_
 
-:hidden:`re_stride_`
+:hidden:`re_stride`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: re_stride_
+.. autofunction:: re_stride
 
 :hidden:`replicate`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
