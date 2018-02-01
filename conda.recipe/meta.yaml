@@ -26,6 +26,10 @@ build:
 test:
   imports:
     - dlt
+  script_env:
+   - VERSION
+   - GIT_BUILD_STR
+   - CONDA_BLD_PATH
 
 about:
   home: https://github.com/dmarnerides/pydlt
