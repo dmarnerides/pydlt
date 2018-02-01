@@ -2,7 +2,8 @@ import os
 import subprocess
 from setuptools import setup, find_packages
 
-version = '0.0.4'
+with open('.version', 'r') as v_file:
+    version = v_file.read().replace('\n', '')
 
 # Got this from here
 # http://blogs.nopcode.org/brainstorm/2013/05/20/pragmatic-python-versioning-via-setuptools-and-git-tags/

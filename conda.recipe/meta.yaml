@@ -1,12 +1,9 @@
-{% set data = load_setup_py_data() %}
-
 package:
   name: pydlt
-  version: {{ data['version'] }}
+  version: {{ environ['VERSION'] }}
 
 source:
   git_url: https://github.com/dmarnerides/pydlt.git
-  git_rev: master
 
 requirements:
   build:
@@ -17,10 +14,14 @@ requirements:
 
 build:
   noarch: python
-  string: {{ GIT_BUILD_STR }}
+  string: {{ environ['GIT_BUILD_STR'] }}
   entry_points:
     - dlt-plot = dlt.viz.csvplot:plot_csv
     - dlt-dispatch = dlt.util.dispatch:dispatch
+  script_env:
+   - VERSION
+   - GIT_BUILD_STR
+   - CONDA_BLD_PATH
 
 test:
   imports:
