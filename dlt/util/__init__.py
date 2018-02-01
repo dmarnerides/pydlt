@@ -7,7 +7,7 @@ from .layers import out_size, in_size, kernel_size, stride_size, padding_size, \
     dilation_size, find_layers
 from .logger import Logger
 from .meter import Averages
-from .misc import slide_window_, re_stride_, moving_avg, moving_var, sub_avg, \
+from .misc import slide_window_, re_stride, moving_avg, moving_var, sub_avg, \
     sub_var, has_nan, has_inf, replace_specials_, replace_inf_, replace_nan_, \
     map_range, str2bool, str_is_int, is_variable, is_tensor, is_cuda, is_array, \
     to_array, to_tensor, permute, hwc2chw, chw2hwc, channel_flip, rgb2bgr, \
@@ -21,7 +21,7 @@ from .data import LoadedDataset, DirectoryDataset
 __all__ = [
     'barit', 'Checkpointer', 'dispatch', 'compose', 'parametrize', 'applier', 'make_grid',
     'out_size', 'in_size', 'kernel_size', 'stride_size', 'padding_size', 'dilation_size', 
-    'find_layers', 'Logger', 'Averages', 'slide_window_', 're_stride_', 'moving_avg', 
+    'find_layers', 'Logger', 'Averages', 'slide_window_', 're_stride', 'moving_avg', 
     'moving_var', 'sub_avg', 'sub_var', 'has_nan', 'has_inf', 'replace_specials_', 'replace_inf_',
     'replace_nan_', 'map_range', 'str2bool', 'str_is_int', 'is_variable', 'is_tensor',
     'is_cuda', 'is_array', 'to_array', 'to_tensor', 'permute', 'hwc2chw', 'chw2hwc',
