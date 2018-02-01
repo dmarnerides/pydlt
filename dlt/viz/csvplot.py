@@ -169,15 +169,9 @@ def plot_csv(use_args=None):
                     data.columns = names
                 data.plot(ax = axes, **plot_args)
             except:
-                if interactive:
-                    figure.canvas.flush_events()
-                else:
-                    figure.show()
-        else:
-            if interactive:
-                figure.canvas.flush_events()
-            else:
                 figure.show()
+        else:
+            figure.show()
         if is_array(axes):
             for i,a in enumerate(axes):
                 a.set_xlabel(opt_dict['xlabel'][i] if isinstance(opt_dict['xlabel'], list) else opt_dict['xlabel'] if opt_dict['xlabel'] is not None else 'x') 
@@ -190,20 +184,6 @@ def plot_csv(use_args=None):
         if display and not interactive:
             plt.show()
 
-    # See this:
-    # https://stackoverflow.com/questions/44278369/how-to-keep-matplotlib-python-window-in-background
-    # and this:
-    # https://stackoverflow.com/questions/45729092/make-interactive-matplotlib-window-not-pop-to-front-on-each-update-windows-7/45734500#45734500
-    def mypause(interval):
-        backend = plt.rcParams['backend']
-        if backend in matplotlib.rcsetup.interactive_bk:
-            figManager = matplotlib._pylab_helpers.Gcf.get_active()
-            if figManager is not None:
-                canvas = figManager.canvas
-                if canvas.figure.stale:
-                    canvas.draw()
-                canvas.start_event_loop(interval)
-                return
 
     figure = plt.figure('viz')
     if opt.refresh is not None and opt.refresh > 0.0:
@@ -212,7 +192,7 @@ def plot_csv(use_args=None):
                 exit()
             data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
             _do_plots(True, data, opt.names, opt.save, opt.display, figure)
-            mypause(opt.refresh)
+            plt.pause(opt.refresh)
     else:
         data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
         _do_plots(False, data, opt.names, opt.save, opt.display, figure)
