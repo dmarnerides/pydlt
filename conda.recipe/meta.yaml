@@ -17,6 +17,7 @@ requirements:
 
 build:
   noarch: python
+  string: {{ GIT_BUILD_STR }}
   entry_points:
     - dlt-plot = dlt.viz.csvplot:plot_csv
     - dlt-dispatch = dlt.util.dispatch:dispatch
