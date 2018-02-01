@@ -2,7 +2,7 @@ import os
 import subprocess
 from setuptools import setup, find_packages
 
-version = '0.0.3'
+version = '0.0.4'
 
 # Got this from here
 # http://blogs.nopcode.org/brainstorm/2013/05/20/pragmatic-python-versioning-via-setuptools-and-git-tags/
