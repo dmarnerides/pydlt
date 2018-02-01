@@ -2,6 +2,7 @@ import os
 import time
 import argparse
 from collections import OrderedDict
+import matplotlib
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -189,6 +190,20 @@ def plot_csv(use_args=None):
         if display and not interactive:
             plt.show()
 
+    # See this:
+    # https://stackoverflow.com/questions/44278369/how-to-keep-matplotlib-python-window-in-background
+    # and this:
+    # https://stackoverflow.com/questions/45729092/make-interactive-matplotlib-window-not-pop-to-front-on-each-update-windows-7/45734500#45734500
+    def mypause(interval):
+        backend = plt.rcParams['backend']
+        if backend in matplotlib.rcsetup.interactive_bk:
+            figManager = matplotlib._pylab_helpers.Gcf.get_active()
+            if figManager is not None:
+                canvas = figManager.canvas
+                if canvas.figure.stale:
+                    canvas.draw()
+                canvas.start_event_loop(interval)
+                return
 
     figure = plt.figure('viz')
     if opt.refresh is not None and opt.refresh > 0.0:
@@ -197,7 +212,7 @@ def plot_csv(use_args=None):
                 exit()
             data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
             _do_plots(True, data, opt.names, opt.save, opt.display, figure)
-            time.sleep(opt.refresh)
+            mypause(opt.refresh)
     else:
         data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
         _do_plots(False, data, opt.names, opt.save, opt.display, figure)
