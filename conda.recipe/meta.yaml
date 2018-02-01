@@ -18,18 +18,10 @@ build:
   entry_points:
     - dlt-plot = dlt.viz.csvplot:plot_csv
     - dlt-dispatch = dlt.util.dispatch:dispatch
-  script_env:
-   - VERSION
-   - GIT_BUILD_STR
-   - CONDA_BLD_PATH
 
 test:
   imports:
     - dlt
-  script_env:
-   - VERSION
-   - GIT_BUILD_STR
-   - CONDA_BLD_PATH
 
 about:
   home: https://github.com/dmarnerides/pydlt
