@@ -1,12 +1,77 @@
 import os
 import time
 import argparse
+from itertools import compress
 from collections import OrderedDict
 import matplotlib
+from matplotlib.animation import FuncAnimation
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from ..util import str2bool, compose, str_is_int, is_array, sub_avg, moving_avg, sub_var, moving_var
+
+
+def _read_csv(f, **kargs):
+    if os.path.isfile(f):
+        df = pd.read_csv(f, **kargs) 
+    else:
+        df = pd.DataFrame()
+    return df
+
+class DataHandler(object):
+    def __init__(self, file_lists, header, ignore_duplicates, transform, names):
+        self.header = 0 if header else None
+        self.ignore_duplicates = ignore_duplicates
+        self.transform = transform
+        self.filenames = [f[0] for f in file_lists]
+        self.orig_columns = [f[1:] if len(f)>1 else [0] for f in file_lists]
+        self.orig_columns = [ [int(c) if str_is_int(c) else c for c in j] for j in self.orig_columns ]
+        self._group_names(names)
+
+    def _group_names(self, names):
+        if names is None:
+            self.orig_names = None
+            return
+        count = 0
+        self.orig_names = []
+        for c in self.orig_columns:
+            self.orig_names.append([])
+            for _ in c:
+                if count == len(names):
+                    self.orig_names[-1].append('no_name')
+                else:
+                    self.orig_names[-1].append(names[count])
+                    count += 1
+
+    #TODO: MAKE THIS MORE EFFICIENT AND LESS OBFUSCATED
+    def get(self):
+        dfs, names, columns = [], [], []
+        for i_file, fname in enumerate(self.filenames):
+            if os.path.isfile(fname):
+                dfs.append(_read_csv(fname, header=self.header))
+                columns.append([])
+                for i_col, c in enumerate(self.orig_columns[i_file]):
+                    if isinstance(c, int) and len(dfs[-1].columns) > c:
+                        columns[-1].append(dfs[-1].columns[c])
+                        if self.orig_names is not None:
+                            names.append(self.orig_names[i_file][i_col])
+                    elif c in dfs[-1]:
+                        columns[-1].append(c)
+                        if self.orig_names is not None:
+                            names.append(self.orig_names[i_file][i_col])
+        # concatenate all the dataframes into a single one
+        data = pd.concat([pd.DataFrame(df.loc[:,columns[i]]) for i,df in enumerate(dfs)], axis=1)
+        if not self.ignore_duplicates:
+            cols = pd.Series(data.columns)
+            for dup in data.columns.get_duplicates():
+                cols[data.columns.get_loc(dup)]=['{0}-dupl{1}'.format(dup,d_idx+1) for d_idx in range(np.sum(dup == cols))]
+            data.columns = cols
+        if self.orig_names is not None:
+            data.columns = names
+        return self.transform(data) if len(data.index) > 0 else data
+
+    __call__ = get
+
 
 class CustomAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -17,28 +82,6 @@ class CustomAction(argparse.Action):
         setattr(namespace, self.dest, values)
         setattr(namespace, '_ordered_args', previous)
 
-def _read_csv(f, **kargs):
-    if os.path.isfile(f):
-        df = pd.read_csv(f, **kargs) 
-    else:
-        df = pd.DataFrame()
-        print('File not found: {0}'.format(f))
-    return df
-
-def _get_data(file_lists, header, ignore_duplicates, transform):
-    filenames = [f[0] for f in file_lists]
-    dfs = [_read_csv(f, header=0 if header else None) for f in filenames if os.path.isfile(f)]
-    if len(dfs) == 0:
-        return None
-    columns = [f[1:] if len(f)>1 else [0] for f in file_lists]
-    columns = [ [df.columns[int(c)] if str_is_int(c) else c for c in columns[i]] for i,df in enumerate(dfs) ]
-    ret = pd.concat([pd.DataFrame(df.loc[:,[c for c in columns[i] if c in df ]]) for i,df in enumerate(dfs)], axis=1)
-    if not ignore_duplicates:
-        cols = pd.Series(ret.columns)
-        for dup in ret.columns.get_duplicates():
-            cols[ret.columns.get_loc(dup)]=['{0}-dupl{1}'.format(dup,d_idx+1) for d_idx in range(np.sum(dup == cols))]
-        ret.columns = cols
-    return transform(ret) if len(ret.index) > 0 else ret
 
 def _get_opts(use_args=None):
     parser = argparse.ArgumentParser(description='Easily plot from csvs.')
@@ -84,7 +127,7 @@ def _get_opts(use_args=None):
     arg('--display', type=str2bool, help='Display plot.', default=True, action=CustomAction)
     arg('--header', type=str2bool, help='CSV has header.', default=True, action=CustomAction)
     arg('--ignore_duplicates', type=str2bool, help='Use only one of columns with the same name.', default=False, action=CustomAction)
-    arg('-s', '--save', help='Filename to save figure.', default='none', action=CustomAction)
+    arg('-s', '--save', help='Filename to save figure (Only if --refresh is not set).', default='none', action=CustomAction)
     arg('-r', '--refresh', type=float, help='Time interval (ms) to refresh figure data from csv.', default=None, action=CustomAction)
     
     if use_args is not None:
@@ -94,7 +137,7 @@ def _get_opts(use_args=None):
 
     return opt
 
-_closure_axes = None
+
 def plot_csv(use_args=None):
     r"""Plots data from csv files using pandas.
     
@@ -121,7 +164,6 @@ def plot_csv(use_args=None):
 
             $ dlt-plot --help
     """
-
     opt = _get_opts(use_args)
     # make Namespace a dict
     opt_dict = vars(opt)
@@ -155,23 +197,26 @@ def plot_csv(use_args=None):
     transform = compose(funcs)
 
     plot_args_list = ['logx', 'logy', 'loglog', 'kind', 'subplots', 'layout',
-                 'use_index', 'sharex', 'sharey', 'figsize', 'grid', 'legend',
-                 'style', 'rot', 'xlim', 'ylim', 'fontsize', 'colormap',
-                 'title', 'table']
+                      'use_index', 'sharex', 'sharey', 'figsize', 'grid', 'legend',
+                      'style', 'rot', 'xlim', 'ylim', 'fontsize', 'colormap',
+                      'title', 'table']
     plot_args = {k: v for k, v in opt_dict.items() if k in plot_args_list}
     
-    def _do_plots(interactive, data, names, save, display, figure):
-        axes = plt.gca()
+    data_handler = DataHandler(opt.file, opt.header, opt.ignore_duplicates, transform, opt.names)
+
+    def _update(frame=None):
+        data = data_handler()
         axes.clear()
+        _set_labels()
         if data is not None and len(data.index) > 0:
             try:
-                if names is not None:
-                    data.columns = names
-                data.plot(ax = axes, **plot_args)
+                return data.plot(ax = axes, **plot_args).get_lines()
             except:
-                figure.show()
+                return axes.plot([],[])
         else:
-            figure.show()
+            return axes.plot([],[])
+
+    def _set_labels():
         if is_array(axes):
             for i,a in enumerate(axes):
                 a.set_xlabel(opt_dict['xlabel'][i] if isinstance(opt_dict['xlabel'], list) else opt_dict['xlabel'] if opt_dict['xlabel'] is not None else 'x') 
@@ -179,21 +224,16 @@ def plot_csv(use_args=None):
         else:
             axes.set_xlabel(opt_dict['xlabel'] if opt_dict['xlabel'] is not None else 'x')
             axes.set_ylabel(opt_dict['ylabel'] if opt_dict['ylabel'] is not None else 'y')
-        if save != 'none':
-            plt.savefig(save, bbox_inches='tight')
-        if display and not interactive:
-            plt.show()
 
-
-    figure = plt.figure('viz')
-    if opt.refresh is not None and opt.refresh > 0.0:
-        while True:
-            if not plt.fignum_exists('viz'):
-                exit()
-            data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
-            _do_plots(True, data, opt.names, opt.save, opt.display, figure)
-            plt.pause(opt.refresh)
+    figure, axes = plt.subplots(num='viz')
+    _update()
+    if opt.refresh is not None and opt.refresh > 0.001:
+        anim = FuncAnimation(fig=figure, func=_update, frames=None,
+                             init_func=None, save_count=None, 
+                             interval=opt.refresh*1000,
+                             repeat=False, blit=False)
     else:
-        data = _get_data(opt.file, opt.header, opt.ignore_duplicates, transform)
-        _do_plots(False, data, opt.names, opt.save, opt.display, figure)
+        if opt.save != 'none':
+            plt.savefig(opt.save, bbox_inches='tight')
 
+    plt.show()
