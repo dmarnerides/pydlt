@@ -50,7 +50,7 @@ MOCK_MODULES = [
     'numpy.ma',
     'matplotlib',
     'matplotlib.pyplot',
-    'matplotlib.animate',
+    'matplotlib.animation',
     'pandas', 
     'cv2']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
