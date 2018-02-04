@@ -60,6 +60,8 @@ class DataHandler(object):
                         if self.orig_names is not None:
                             names.append(self.orig_names[i_file][i_col])
         # concatenate all the dataframes into a single one
+        if not dfs:
+            return None
         data = pd.concat([pd.DataFrame(df.loc[:,columns[i]]) for i,df in enumerate(dfs)], axis=1)
         if not self.ignore_duplicates:
             cols = pd.Series(data.columns)
