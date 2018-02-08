@@ -12,7 +12,7 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
             (default 'torch').
         color (bool, optional): Treat images as colored or not (default True).
         size (list or tuple, optional): Grid dimensions, rows x columns. (default None).
-        inter_pad (int, optional): Padding separating the images (default None).
+        inter_pad (int or list/tuple, optional): Padding separating the images (default None).
         fill_value (int, optional): Fill value for inter-padding (default 0).
 
     Returns:
@@ -116,8 +116,10 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
         n_col = size[0]
         n_row = size[1]
     
-    if (inter_pad is not None) and inter_pad > 0:
-        inter_w_padding,  inter_h_padding = inter_pad[1] * (n_col - 1), inter_pad[0] * (n_row - 1)
+    if inter_pad is not None:
+        if isinstance(inter_pad, int):
+            inter_pad = (inter_pad, inter_pad)
+        inter_w_padding,  inter_h_padding = max(inter_pad[1],0) * (n_col - 1), max(inter_pad[0],0) * (n_row - 1)
     else:
         inter_w_padding,  inter_h_padding = 0, 0
 
