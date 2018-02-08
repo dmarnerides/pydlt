@@ -62,8 +62,6 @@ Quality of Life
 .. autofunction:: count_parameters
 
 
-.. currentmodule:: dlt.util
-
 Tensor/Array Operations
 ------------------------
 
@@ -283,14 +281,13 @@ Datasets
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: LoadedDataset
-    :members:
+   :members:
 
 :hidden:`DirectoryDataset`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autoclass:: DirectoryDataset
-    :members:
-
+   :members:
 
 Sampling
 ------------------------
