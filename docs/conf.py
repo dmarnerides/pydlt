@@ -43,7 +43,6 @@ class Mock(MagicMock):
 MOCK_MODULES = [
     'torch',
     'torch.optim',
-    # 'torch.utils.data',
     'torch.autograd',
     'torch.optim.lr_scheduler',
     'numpy',
@@ -54,7 +53,7 @@ MOCK_MODULES = [
     'pandas', 
     'cv2']
 sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-sys.modules['torch.utils.data'] = Mock(Dataset=object)
+sys.modules.update(('torch.utils.data', Mock(Dataset=object)))
 
 import dlt
 import sphinx_rtd_theme
