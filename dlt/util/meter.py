@@ -23,6 +23,8 @@ class Average(object):
 
     def get(self):
         """Returns the current average"""
+        if self.count == 0:
+            return 0
         return self.value/self.count
 
 class Averages(object):
