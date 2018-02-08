@@ -2,7 +2,7 @@ import os
 import subprocess
 from setuptools import setup, find_packages
 
-with open('.version_str', 'r') as v_file:
+with open('.version', 'r') as v_file:
     version = v_file.read().replace('\n', '')
 
 # Got this from here
