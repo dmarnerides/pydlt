@@ -119,18 +119,20 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
     if inter_pad is not None:
         if isinstance(inter_pad, int):
             inter_pad = (inter_pad, inter_pad)
-        inter_w_padding,  inter_h_padding = max(inter_pad[1],0) * (n_col - 1), max(inter_pad[0],0) * (n_row - 1)
+        w_pad, h_pad = inter_pad[1], inter_pad[0]
+        total_w_padding,  total_h_padding = max(w_pad,0) * (n_col - 1), max(h_pad,0) * (n_row - 1)
     else:
-        inter_w_padding,  inter_h_padding = 0, 0
+        w_pad, h_pad = 0, 0
+        total_w_padding,  total_h_padding = 0, 0
 
-    w,h = int(im_w * n_col) + inter_w_padding, int(im_h * n_row) + inter_h_padding
+    w,h = int(im_w * n_col) + total_w_padding, int(im_h * n_row) + total_h_padding
     grid = torch.Tensor(n_chan,w,h).type_as(images).fill_(fill_value)
     for i in range(n_images):
         i_row = i % n_row
         i_col = int(i/n_row)
         grid[:,
-             i_col*(im_w + inter_w_padding):(i_col)*(im_w + inter_w_padding) + im_w,
-             i_row*(im_h + inter_h_padding):(i_row)*(im_h + inter_h_padding) + im_h].copy_(images[i])
+             i_col*(im_w + w_pad):(i_col)*(im_w + w_pad) + im_w,
+             i_row*(im_h + h_pad):(i_row)*(im_h + h_pad) + im_h].copy_(images[i])
 
     if should_convert_to_array:
         grid = to_array(grid)
