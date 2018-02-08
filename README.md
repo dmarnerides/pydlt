@@ -1,4 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/pydlt/badge/?version=latest)](http://pydlt.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/dmarnerides/pydlt.svg?branch=master)](https://travis-ci.org/dmarnerides/pydlt)
 
 # PyTorch Deep Learning Toolbox
 
