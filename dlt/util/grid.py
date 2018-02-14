@@ -1,9 +1,9 @@
 import torch
 import numpy as np
 from .misc import _determine_view, change_view, is_array, is_tensor, \
-                  is_variable, to_array, to_tensor
+                  is_variable, to_array, to_tensor, map_range
 
-def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_value=0):
+def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_value=0, scale_each=True):
     """Creates a single image grid from a set of images.
 
     Args:
@@ -14,6 +14,7 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
         size (list or tuple, optional): Grid dimensions, rows x columns. (default None).
         inter_pad (int or list/tuple, optional): Padding separating the images (default None).
         fill_value (int, optional): Fill value for inter-padding (default 0).
+        scale_each (bool, optional): Scale each image to [0-1].
 
     Returns:
         Tensor or Array: The resulting grid. If any of the inputs is an Array
@@ -104,7 +105,10 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
         raise TypeError('make_grid can only accept tuples, lists, tensors, '
                          'variables and numpy arrays. Got {0}'.format(torch.typename(images)))
 
-    
+    # Scale each
+    if scale_each:
+        for i in images.size(0):
+            images[i] = map_range(images[i])
 
     ### Finally create grid
     n_images, n_chan, im_w, im_h = images.size()[0], images.size()[1],images.size()[2], images.size()[3]    
