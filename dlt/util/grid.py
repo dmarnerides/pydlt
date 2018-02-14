@@ -107,7 +107,7 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
 
     # Scale each
     if scale_each:
-        for i in images.size(0):
+        for i in range(images.size(0)):
             images[i] = map_range(images[i])
 
     ### Finally create grid
