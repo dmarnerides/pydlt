@@ -2,6 +2,7 @@ import torch
 from torch import autograd
 from torch.autograd import Variable
 from .ganbasetrainer import GANBaseTrainer
+from ..util.misc import _get_scalar_value
 
 class WGANGPTrainer(GANBaseTrainer):
     """Wasserstein GAN Trainer with gradient penalty. 
@@ -41,12 +42,17 @@ class WGANGPTrainer(GANBaseTrainer):
         self.lambda_gp = lambda_gp
         self.alpha = None
         self.gradout = None
-
+                
     def d_step(self, g_input, real_input):
         for p in self.discriminator.parameters():
             p.requires_grad = True
         self.discriminator.zero_grad()
-        prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
+        if self._use_no_grad:
+            with torch.no_grad():
+                t_pred = self.generator(Variable(g_input)).data
+            prediction = Variable(t_pred)
+        else:
+            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
         error_fake = self.discriminator(prediction).mean()
         error_real = self.discriminator(Variable(real_input)).mean()
         gp = self.get_gp(prediction.data, real_input)
@@ -60,7 +66,9 @@ class WGANGPTrainer(GANBaseTrainer):
         total_loss.backward()
         self.d_optimizer.step()
 
-        ret_losses = {'w_loss': w_loss.data[0], 'gp': gp.data[0], 'd_loss': total_loss.data[0]}
+        ret_losses = {'w_loss': _get_scalar_value(w_loss.data),
+                      'gp': _get_scalar_value(gp.data),
+                      'd_loss': _get_scalar_value(total_loss.data)}
         self.d_iter_counter += 1
         return prediction.data, ret_losses
 
@@ -69,12 +77,20 @@ class WGANGPTrainer(GANBaseTrainer):
             p.requires_grad = False
         if self.training:
             self.generator.zero_grad()
-        prediction = self.generator(Variable(g_input, volatile=not self.training))
-        error = - self.discriminator(prediction).mean()
-        if self.training:
+            prediction = self.generator(Variable(g_input))
+            error = - self.discriminator(prediction).mean()
             error.backward()
             self.g_optimizer.step()
-        return prediction.data, {'g_loss': error.data[0]}
+        else:
+            if self._use_no_grad:
+                with torch.no_grad():
+                    prediction = self.generator(Variable(g_input))
+                    error = - self.discriminator(prediction).mean()
+            else:
+                prediction = self.generator(Variable(g_input, volatile=True))
+                error = - self.discriminator(prediction).mean()
+        return prediction.data, {'g_loss': _get_scalar_value(error.data)}
+
 
     def make_alpha(self, real_input):
         dimensions = [real_input.size(0), *[1 for x in range(real_input.ndimension() - 1)]]

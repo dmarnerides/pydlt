@@ -1,5 +1,5 @@
 from ..util import barit
-
+from ..util.misc import _torch_version
 
 class BaseTrainer(object):
     """Generic Base trainer object to inherit functionality from."""
@@ -8,6 +8,9 @@ class BaseTrainer(object):
         self.use_gpu = False
         self._models = {}
         self._losses = {}
+        # Compatibility patching volatile / torch.no_grad() !
+        # Will remove it once 0.4 is released
+        self._use_no_grad = _torch_version.minor > 3 and _torch_version.major == 0
     
     def cuda(self):
         """Sets the trainer to GPU mode. 

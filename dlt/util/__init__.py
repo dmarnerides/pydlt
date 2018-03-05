@@ -12,7 +12,8 @@ from .misc import slide_window_, re_stride, moving_avg, moving_var, sub_avg, \
     map_range, str2bool, str_is_int, is_variable, is_tensor, is_cuda, is_array, \
     to_array, to_tensor, permute, hwc2chw, chw2hwc, channel_flip, rgb2bgr, \
     bgr2rgb, change_view, cv2torch, torch2cv, cv2plt, plt2cv, plt2torch, \
-    torch2plt, replicate, _determine_view, count_parameters
+    torch2plt, replicate, _determine_view, count_parameters, _torch_version, \
+    _get_scalar_value
 from . import paths
 from .sample import index_gauss, slice_gauss, index_uniform, slice_uniform
 from .slurm import slurm

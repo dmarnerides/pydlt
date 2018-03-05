@@ -510,3 +510,25 @@ def torch2plt(x):
     For more detail see :func:`change_view`
     """
     return change_view(to_array(x), 'torch', 'plt')
+
+
+# Functions for backward/forward compatibility..!
+def _get_torch_version():
+    major, minor, _ = torch.__version__.split('.')
+    if major[0] == 'v':
+        major = int(major[1:])
+    else:
+        major = int(major)
+    minor = int(minor)
+    class VRS(object):
+        def __init__(self, major, minor):
+            self.major = major
+            self.minor = minor
+    return VRS(major, minor)
+
+_torch_version = _get_torch_version()
+
+if _torch_version.minor > 3 and _torch_version.major == 0:
+    _get_scalar_value = lambda x: x.item()
+else:
+    _get_scalar_value = lambda x: x[0]

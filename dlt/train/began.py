@@ -1,6 +1,8 @@
 import math
+import torch
 from torch.autograd import Variable
 from .ganbasetrainer import GANBaseTrainer
+from ..util.misc import _get_scalar_value
 
 class BEGANTrainer(GANBaseTrainer):
     """Boundary Equilibrium GAN trainer. 
@@ -49,7 +51,12 @@ class BEGANTrainer(GANBaseTrainer):
         for p in self.discriminator.parameters():
             p.requires_grad = True
         self.discriminator.zero_grad()
-        prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
+        if self._use_no_grad:
+            with torch.no_grad():
+                t_pred = self.generator(Variable(g_input)).data
+            prediction = Variable(t_pred)
+        else:
+            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
         fake_loss = (self.discriminator(prediction) - prediction).abs().mean()
         v_real_input = Variable(real_input)
         real_loss = (self.discriminator(v_real_input) - v_real_input).abs().mean()
@@ -62,11 +69,13 @@ class BEGANTrainer(GANBaseTrainer):
         d_loss.backward()
         self.d_optimizer.step()
 
-        balance = (self.gamma * real_loss.data[0] - fake_loss.data[0])
+        balance = (self.gamma * _get_scalar_value(real_loss.data) - _get_scalar_value(fake_loss.data))
         self.k = min(max(self.k + self.lambda_k*balance, 0), 1)
-        measure = real_loss.data[0] + math.fabs(balance)
+        measure = _get_scalar_value(real_loss.data) + math.fabs(balance)
 
-        ret_losses = {'d_loss': d_loss.data[0], 'real_loss': real_loss.data[0], 'fake_loss': fake_loss.data[0],
+        ret_losses = {'d_loss': _get_scalar_value(d_loss.data),
+                      'real_loss': _get_scalar_value(real_loss.data),
+                      'fake_loss': _get_scalar_value(fake_loss.data),
                       'k': self.k, 'measure': measure, 'balance': balance}
         self.d_iter_counter += 1
         return prediction.data, ret_losses
@@ -76,9 +85,16 @@ class BEGANTrainer(GANBaseTrainer):
             p.requires_grad = False
         if self.training:
             self.generator.zero_grad()
-        prediction = self.generator(Variable(g_input, volatile=not self.training))
-        error = (self.discriminator(prediction) - prediction).abs().mean()
-        if self.training:
+            prediction = self.generator(Variable(g_input))
+            error = (self.discriminator(prediction) - prediction).abs().mean()
             error.backward()
             self.g_optimizer.step()
-        return prediction.data, {'g_loss': error.data[0]}
+        else:
+            if self._use_no_grad:
+                with torch.no_grad():
+                    prediction = self.generator(Variable(g_input))
+                    error = (self.discriminator(prediction) - prediction).abs().mean()
+            else:
+                prediction = self.generator(Variable(g_input, volatile=True))
+                error = (self.discriminator(prediction) - prediction).abs().mean()
+        return prediction.data, {'g_loss': _get_scalar_value(error.data)}

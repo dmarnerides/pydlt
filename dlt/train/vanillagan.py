@@ -1,6 +1,7 @@
 import torch
 from torch.autograd import Variable
 from .ganbasetrainer import GANBaseTrainer
+from ..util.misc import _get_scalar_value
 
 class VanillaGANTrainer(GANBaseTrainer):
     """Generative Adversarial Networks trainer. 
@@ -51,7 +52,13 @@ class VanillaGANTrainer(GANBaseTrainer):
         for p in self.discriminator.parameters():
             p.requires_grad = True
         self.discriminator.zero_grad()
-        prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
+
+        if self._use_no_grad:
+            with torch.no_grad():
+                t_pred = self.generator(Variable(g_input)).data
+            prediction = Variable(t_pred)
+        else:
+            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
         real_label = Variable(prediction.data.new(batch_size,1).fill_(self.real_label))
         fake_label = Variable(prediction.data.new(batch_size,1).fill_(self.fake_label))
 
@@ -64,7 +71,9 @@ class VanillaGANTrainer(GANBaseTrainer):
         total_loss.backward()
         self.d_optimizer.step()
 
-        ret_losses = {'d_loss': total_loss.data[0], 'real_loss':loss_real.data[0], 'fake_loss': loss_fake.data[0]}
+        ret_losses = {'d_loss': _get_scalar_value(total_loss.data), 
+                      'real_loss': _get_scalar_value(loss_real.data), 
+                      'fake_loss': _get_scalar_value(loss_fake.data)}
         self.d_iter_counter += 1
         return prediction.data, ret_losses
 
@@ -75,12 +84,26 @@ class VanillaGANTrainer(GANBaseTrainer):
             p.requires_grad = False
         if self.training:
             self.generator.zero_grad()
-        prediction = self.generator(Variable(g_input, volatile=not self.training))
-        # fake labels are real for generator cost
-        d_prediction = self.discriminator(prediction)
-        labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
-        error = self.bce(d_prediction, labelv)
-        if self.training:
+            prediction = self.generator(Variable(g_input))
+            # fake labels are real for generator cost
+            d_prediction = self.discriminator(prediction)
+            labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
+            error = self.bce(d_prediction, labelv)
             error.backward()
             self.g_optimizer.step()
-        return prediction.data, {'g_loss': error.data[0]}
+        else:
+            if self._use_no_grad:
+                with torch.no_grad:
+                    prediction = self.generator(Variable(g_input))
+                    # fake labels are real for generator cost
+                    d_prediction = self.discriminator(prediction)
+                    labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
+                    error = self.bce(d_prediction, labelv)
+            else:
+                prediction = self.generator(Variable(g_input, volatile=True))
+                # fake labels are real for generator cost
+                d_prediction = self.discriminator(prediction)
+                labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
+                error = self.bce(d_prediction, labelv)
+
+        return prediction.data, {'g_loss': _get_scalar_value(error.data)}

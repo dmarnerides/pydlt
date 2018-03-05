@@ -1,5 +1,7 @@
+import torch
 from torch.autograd import Variable
 from .ganbasetrainer import GANBaseTrainer
+from ..util.misc import _get_scalar_value
 
 class FisherGANTrainer(GANBaseTrainer):
     """Fisher GAN trainer. 
@@ -48,7 +50,12 @@ class FisherGANTrainer(GANBaseTrainer):
         if self.alpha is None:
             self.alpha = Variable(g_input.new([0]), requires_grad=True)
         
-        prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
+        if self._use_no_grad:
+            with torch.no_grad():
+                t_pred = self.generator(Variable(g_input)).data
+            prediction = Variable(t_pred)
+        else:
+            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
         vphi_fake = self.discriminator(prediction)
         vphi_real = self.discriminator(Variable(real_input))
 
@@ -66,23 +73,36 @@ class FisherGANTrainer(GANBaseTrainer):
         self.alpha.grad.data.zero_()
 
         # IPM
-        ipm_enum = epf.data[0] - eqf.data[0]
-        ipm_denom = (0.5*epf2.data[0] + 0.5*eqf2.data[0])**0.5
+        ipm_enum = _get_scalar_value(epf.data) - _get_scalar_value(eqf.data)
+        ipm_denom = (0.5*_get_scalar_value(epf2.data) + 0.5*_get_scalar_value(eqf2.data))**0.5
         ipm_ratio = ipm_enum/ipm_denom
-        ret_losses = {'ipm_enum': ipm_enum, 'ipm_denom': ipm_denom, 'ipm_ratio': ipm_ratio,
-                      'd_loss': -d_loss.data[0], 'constraint': 1 - constraint.data[0],
-                      'epf': epf.data[0], 'eqf': eqf.data[0], 'epf2': epf2.data[0],
-                      'eqf2': eqf2.data[0], 'lagrange': self.alpha.data[0]}
+        ret_losses = {'ipm_enum': ipm_enum, 'ipm_denom': ipm_denom, 
+                      'ipm_ratio': ipm_ratio, 
+                      'd_loss': -_get_scalar_value(d_loss.data), 
+                      'constraint': 1 - _get_scalar_value(constraint.data),
+                      'epf': _get_scalar_value(epf.data),
+                      'eqf': _get_scalar_value(eqf.data),
+                      'epf2': _get_scalar_value(epf2.data),
+                      'eqf2': _get_scalar_value(eqf2.data),
+                      'lagrange': _get_scalar_value(self.alpha.data)}
         self.d_iter_counter += 1
         return prediction.data, ret_losses
 
     def g_step(self, g_input):
         for p in self.discriminator.parameters():
             p.requires_grad = False
-        prediction = self.generator(Variable(g_input, volatile=not self.training))
-        error = - self.discriminator(prediction).mean()
         if self.training:
             self.generator.zero_grad()
+            prediction = self.generator(Variable(g_input))
+            error = - self.discriminator(prediction).mean()
             error.backward()
             self.g_optimizer.step()
-        return prediction.data, {'g_loss': error.data[0]}
+        else:
+            if self._use_no_grad:
+                with torch.no_grad():
+                    prediction = self.generator(Variable(g_input))
+                    error = - self.discriminator(prediction).mean()
+            else:
+                prediction = self.generator(Variable(g_input, volatile=True))
+                error = - self.discriminator(prediction).mean()
+        return prediction.data, {'g_loss': _get_scalar_value(error.data)}
