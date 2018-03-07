@@ -104,7 +104,7 @@ def slide_window_(a, kernel, stride=None):
 
 # TODO: Add example
 def re_stride(a, kernel, stride=None):
-    """Returns a re-shaped and re-strided tensor/variable given a kernel.
+    """Returns a re-shaped and re-strided tensor/variable given a kernel (uses as_strided).
 
     Args:
         a (Tensor): The Tensor to re-stride.
@@ -124,10 +124,10 @@ def re_stride(a, kernel, stride=None):
 
 
 def replicate(x, dim=-3, nrep=3):
-    """Replicates Tensor in a new dimension.
+    """Replicates Tensor/Array in a new dimension.
 
     Args:
-        x (Tensor): Tensor to replicate.
+        x (Tensor or Array): Tensor to replicate.
         dim (int, optional): New dimension where replication happens.
         nrep (int, optional): Number of replications.
     """
@@ -196,22 +196,27 @@ def sub_var(x, width=5):
     else:
         return x.var()
 
+def has(x, val):
+    """Checks if a Tensor/Array has a value val. Does not work with nan (use :func:`has_nan`)."""
+    return bool((x == val).sum() != 0)
+
 def has_nan(x):
-    """Checks if a Numpy array has NaNs."""
-    return np.isnan(x).sum() > 0
+    """Checks if a Tensor/Array has NaNs."""
+    return bool((x != x).sum() > 0)
+
 
 def has_inf(x):
-    """Checks if a Numpy array has Infs."""
-    return np.isinf(x).sum() > 0
+    """Checks if a Tensor/Array array has Infs."""
+    return has(x, float('inf'))
 
 def replace_specials_(x, val=0):
-    """Replaces NaNs and Infs from a Numpy Array.
+    """Replaces NaNs and Infs from a Tensor/Array.
     
     Args:
-        x (Array): The Array (gets replaced in place).
+        x (Tensor or Array): The Tensor/Array (gets replaced in place).
         val (int, optional): Value to replace NaNs and Infs with (default 0).
     """
-    x[np.isinf(x) | np.isnan(x)] = val
+    x[ (x == float('inf')) | (x != x) ] = val
     return x
 
 def replace_inf_(x, val=0):
@@ -221,7 +226,7 @@ def replace_inf_(x, val=0):
         x (Array): The Array (gets replaced in place).
         val (int, optional): Value to replace Infs with (default 0).
     """
-    x[np.isinf(x)] = val
+    x[x == float('inf')] = val
     return x
 
 def replace_nan_(x, val=0):
@@ -231,7 +236,7 @@ def replace_nan_(x, val=0):
         x (Array): The Array (gets replaced in place).
         val (int, optional): Value to replace Infs with (default 0).
     """
-    x[np.isnan(x)] = val
+    x[x != x] = val
     return x
 
 def map_range(x, low=0, high=1):
@@ -240,11 +245,13 @@ def map_range(x, low=0, high=1):
         return np.interp(x, [x.min(), x.max()], [low, high]).astype(x.dtype)
     else:
         xmax, xmin = x.max(), x.min()
+        if xmax - xmin == 0:
+            return x.clone().fill_(0)
         return x.add(-xmin).div_(xmax-xmin).mul_(high-low).add_(low).clamp_(low, high)
 
 def is_variable(x):
-    """Checks if input type contains 'variable' in its typename."""
-    return torch.typename(x).find('variable') >= 0
+    """Checks if input is a Variable instance."""
+    return isinstance(x, torch.autograd.Variable)
 
 # This was added to torch in v0.3. Keeping it here too.
 def is_tensor(x):
@@ -252,8 +259,8 @@ def is_tensor(x):
     return torch.is_tensor(x)
     
 def is_cuda(x):
-    """Checks if input type contains 'cuda' in its typename."""
-    return torch.typename(x).find('cuda') >= 0
+    """Checks if input is a cuda Tensor."""
+    return torch.is_tensor(x) and x.is_cuda
 
 def is_array(x):
     """Checks if input type contains 'array' or 'series' in its typename."""
@@ -274,12 +281,9 @@ def to_array(x):
     if is_cuda(x):
         x = x.cpu()
     if is_tensor(x):
-        # See https://github.com/pytorch/pytorch/issues/2968
-        if torch.typename(x) == 'torch.HalfTensor':
-            x = x.float().numpy().astype('float16')
-        else:
-            x = x.numpy()
-    return x
+        return x.numpy()
+    else:
+        return x.copy()
 
 ## Returns a cpu tensor COPY version of x
 def to_tensor(x):
@@ -291,21 +295,20 @@ def to_tensor(x):
     Automatically gets the data from torch Variables and casts GPU Tensors to cpu.
     to CPU.
     """
-    if is_array(x):
-        x = torch.from_numpy(x)
     if is_variable(x):
-        x = x.data.clone()
+        return x.data.clone()
     if is_cuda(x):
-        x = x.cpu()
-    return x
+        return x.cpu()
+    if is_array(x):
+        return torch.from_numpy(x)
+    else
+        return x.clone()
 
 ########
 ### Variables, tensors, arrays, cuda, cpu, image views etc
 ########
-
-
 def permute(x, perm):
-    """Permutes the last three dimensions of the input.
+    """Permutes the last three dimensions of the input Tensor or Array.
 
     Args:
         x (Tensor or Array): Input to be permuted.
@@ -314,7 +317,7 @@ def permute(x, perm):
     Note:
         If the input has less than three dimensions a copy is returned.
     """
-    if is_tensor(x) or is_variable(x):
+    if is_tensor(x):
         if x.dim() < 3:
             return x.clone()
         else:     
@@ -381,7 +384,6 @@ def rgb2bgr(x, dim=-3):
 def bgr2rgb(x, dim=-3):
     """Reverses the channel dimension. See :func:`channel_flip`"""
     return channel_flip(x, dim)
-    
 
 # Getting images from one library to the other
 # Always assuming the last three dimensions are the images
