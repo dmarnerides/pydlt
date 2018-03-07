@@ -516,6 +516,10 @@ def torch2plt(x):
 
 # Functions for backward/forward compatibility..!
 def _get_torch_version():
+    class VRS(object):
+        def __init__(self, major, minor):
+            self.major = major
+            self.minor = minor
     try:
         major, minor, _ = torch.__version__.split('.')
     except:
@@ -526,10 +530,6 @@ def _get_torch_version():
     else:
         major = int(major)
     minor = int(minor)
-    class VRS(object):
-        def __init__(self, major, minor):
-            self.major = major
-            self.minor = minor
     return VRS(major, minor)
 
 _torch_version = _get_torch_version()
