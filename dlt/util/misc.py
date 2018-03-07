@@ -516,7 +516,11 @@ def torch2plt(x):
 
 # Functions for backward/forward compatibility..!
 def _get_torch_version():
-    major, minor, _ = torch.__version__.split('.')
+    try:
+        major, minor, _ = torch.__version__.split('.')
+    except:
+        print('Unknown torch version')
+        return VRS(-1, -1)
     if major[0] == 'v':
         major = int(major[1:])
     else:
