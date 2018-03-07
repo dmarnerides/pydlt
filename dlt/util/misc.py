@@ -301,7 +301,7 @@ def to_tensor(x):
         return x.cpu()
     if is_array(x):
         return torch.from_numpy(x)
-    else
+    else:
         return x.clone()
 
 ########
