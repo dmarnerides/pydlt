@@ -521,7 +521,9 @@ def _get_torch_version():
             self.major = major
             self.minor = minor
     try:
-        major, minor, _ = torch.__version__.split('.')
+        vrs_split = torch.__version__.split('.')
+        major = vrs_split[0]
+        minor = vrs_split[1]
     except:
         print('Unknown torch version')
         return VRS(-1, -1)
