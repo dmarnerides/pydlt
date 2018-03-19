@@ -3,7 +3,7 @@ import numpy as np
 from .misc import _determine_view, change_view, is_array, is_tensor, \
                   is_variable, to_array, to_tensor, map_range
 
-def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_value=0, scale_each=True):
+def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_value=0, scale_each=False):
     """Creates a single image grid from a set of images.
 
     Args:
@@ -14,7 +14,7 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
         size (list or tuple, optional): Grid dimensions, rows x columns. (default None).
         inter_pad (int or list/tuple, optional): Padding separating the images (default None).
         fill_value (int, optional): Fill value for inter-padding (default 0).
-        scale_each (bool, optional): Scale each image to [0-1].
+        scale_each (bool, optional): Scale each image to [0-1] (default False).
 
     Returns:
         Tensor or Array: The resulting grid. If any of the inputs is an Array
