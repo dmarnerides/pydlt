@@ -97,7 +97,7 @@ def directory_dataset(load_fn=imread, preprocess=None, subset=None):
         from the built-in ones. If :func:`dlt.config.parse` was not called in the 
         main script, this function will call it.
 
-    """DataLoader
+    """
     opts = fetch_opts(['dataset', 'dataloader'], subset)
     if opts.load_all:
         dummy_set = DirectoryDataset(opts.data, extensions=opts.extensions, load_fn=load_fn)
