@@ -38,7 +38,7 @@ def torchvision_dataset(transform=None, train=True, subset=None):
     """
     opts = fetch_opts(['dataset'], subset)
 
-    if opts.torchvision_dataset is None:DataLoader
+    if opts.torchvision_dataset is None:
         if subset is not None:
             apnd = '_' + subset
         else:
