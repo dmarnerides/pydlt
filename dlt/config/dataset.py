@@ -49,19 +49,23 @@ def torchvision_dataset(transform=None, train=True, subset=None):
         from torchvision.datasets import MNIST
         MNIST.__getitem__ = _custom_get_item
         ret_dataset = MNIST(opts.data, train=train, download=True, transform=transform)
-        # Add channel dimension for consistency
+        # Add channel dimension and make numpy for consistency
         if train:
             ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3).numpy()
+            ret_dataset.train_labels = train_labels.numpy()
         else:
             ret_dataset.test_data = ret_dataset.test_data.unsqueeze(3).numpy()
+            ret_dataset.test_labels = test_labels.numpy()
     elif opts.torchvision_dataset == 'fashionmnist':
         from torchvision.datasets import FashionMNIST
         FashionMNIST.__getitem__ = _custom_get_item
         ret_dataset = FashionMNIST(opts.data, train=train, download=True, transform=transform)
         if train:
             ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3).numpy()
+            ret_dataset.train_labels = train_labels.numpy()
         else:
             ret_dataset.test_data = ret_dataset.test_data.unsqueeze(3).numpy()
+            ret_dataset.test_labels = test_labels.numpy()
     elif opts.torchvision_dataset == 'cifar10':
         from torchvision.datasets import CIFAR10
         CIFAR10.__getitem__ = _custom_get_item
