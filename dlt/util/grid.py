@@ -93,8 +93,8 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
     elif is_tensor(images) or is_variable(images) or is_array(images):
         should_convert_to_array = is_array(images)
         images = to_tensor(images)
-        if color:   
-            images = change_view(images, orig_view, 'torch')
+        images = change_view(images, orig_view, 'torch')
+        if color:
             if images.size()[-3] != 3:
                 raise ValueError('A provided image does not have 3 channels. '
                                  'Maybe you wanted to pass color=False or a different view?')
