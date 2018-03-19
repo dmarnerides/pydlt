@@ -2,6 +2,7 @@ from torch.utils.data import DataLoader
 from ..util import barit, DirectoryDataset, LoadedDataset
 from ..hdr.io import imread
 from .opts import fetch_opts
+from ..util.misc import _torch_version
 
 def _custom_get_item(self, index):
     if self.train:
@@ -111,7 +112,7 @@ def directory_dataset(load_fn=imread, preprocess=None, subset=None):
     return ret_dataset
 
 
-def loader(dataset, preprocess=None, subset=None):
+def loader(dataset, preprocess=None, subset=None, worker_init_fn=None):
     """Creates a torch DataLoader using the dataset, configured using Command Line Arguments.
 
     Args:
@@ -133,7 +134,13 @@ def loader(dataset, preprocess=None, subset=None):
 
     """
     opts = fetch_opts(['dataloader'], subset)
-    return DataLoader(LoadedDataset(dataset,preprocess),
-                      batch_size=opts.batch_size, num_workers=opts.num_threads,
-                      pin_memory=opts.pin_memory, shuffle=opts.shuffle,
-                      drop_last=opts.drop_last)
+    if _torch_version.minor > 3 and _torch_version.major == 0:
+        return DataLoader(LoadedDataset(dataset,preprocess),
+                        batch_size=opts.batch_size, num_workers=opts.num_threads,
+                        pin_memory=opts.pin_memory, shuffle=opts.shuffle,
+                        drop_last=opts.drop_last, worker_init_fn=worker_init_fn)
+    else:
+        return DataLoader(LoadedDataset(dataset,preprocess),
+                        batch_size=opts.batch_size, num_workers=opts.num_threads,
+                        pin_memory=opts.pin_memory, shuffle=opts.shuffle,
+                        drop_last=opts.drop_last)
