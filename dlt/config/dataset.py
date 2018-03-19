@@ -38,7 +38,7 @@ def torchvision_dataset(transform=None, train=True, subset=None):
     """
     opts = fetch_opts(['dataset'], subset)
 
-    if opts.torchvision_dataset is None:
+    if opts.torchvision_dataset is None:DataLoader
         if subset is not None:
             apnd = '_' + subset
         else:
@@ -51,17 +51,17 @@ def torchvision_dataset(transform=None, train=True, subset=None):
         ret_dataset = MNIST(opts.data, train=train, download=True, transform=transform)
         # Add channel dimension for consistency
         if train:
-            ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3)
+            ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3).numpy()
         else:
-            ret_dataset.test_data = ret_dataset.test_data.unsqueeze(3)
+            ret_dataset.test_data = ret_dataset.test_data.unsqueeze(3).numpy()
     elif opts.torchvision_dataset == 'fashionmnist':
         from torchvision.datasets import FashionMNIST
         FashionMNIST.__getitem__ = _custom_get_item
         ret_dataset = FashionMNIST(opts.data, train=train, download=True, transform=transform)
         if train:
-            ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3)
+            ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3).numpy()
         else:
-            ret_dataset.test_data = ret_dataset.test_data.unsqueeze(3)
+            ret_dataset.test_data = ret_dataset.test_data.unsqueeze(3).numpy()
     elif opts.torchvision_dataset == 'cifar10':
         from torchvision.datasets import CIFAR10
         CIFAR10.__getitem__ = _custom_get_item
@@ -93,7 +93,7 @@ def directory_dataset(load_fn=imread, preprocess=None, subset=None):
         from the built-in ones. If :func:`dlt.config.parse` was not called in the 
         main script, this function will call it.
 
-    """
+    """DataLoader
     opts = fetch_opts(['dataset', 'dataloader'], subset)
     if opts.load_all:
         dummy_set = DirectoryDataset(opts.data, extensions=opts.extensions, load_fn=load_fn)
