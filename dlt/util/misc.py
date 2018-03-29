@@ -296,7 +296,7 @@ def to_tensor(x):
     to CPU.
     """
     if is_variable(x):
-        return x.data.clone()
+        return x.data.cpu().clone()
     if is_cuda(x):
         return x.cpu()
     if is_array(x):
