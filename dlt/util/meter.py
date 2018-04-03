@@ -19,7 +19,7 @@ class Average(object):
                 Can be used to register multiple (summed) values at once (default 1).
         """
         self.count += count
-        self.value += value
+        self.value += value*count
 
     def get(self):
         """Returns the current average"""
