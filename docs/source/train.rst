@@ -35,6 +35,12 @@ WGAN-GP
 .. autoclass:: WGANGPTrainer
     :members:
 
+WGAN-CT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: WGANCTTrainer
+    :members:
+
 BEGAN
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

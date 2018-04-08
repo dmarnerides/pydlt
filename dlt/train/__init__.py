@@ -4,4 +4,5 @@ from .fishergan import FisherGANTrainer
 from .vanilla import VanillaTrainer
 from .vanillagan import VanillaGANTrainer
 from .wgangp import WGANGPTrainer
+from .wganct import WGANCTTrainer
 from .began import BEGANTrainer
