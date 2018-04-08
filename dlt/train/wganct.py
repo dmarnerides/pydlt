@@ -30,8 +30,15 @@ class WGANCTTrainer(GANBaseTrainer):
         - The generator prediction.
         - A dictionary with:
             
-            - `d_loss`, `w_loss`, `gp` if training mode.
+            - `d_loss`, `w_loss`, `gp`, `ct` if training mode.
             - `g_loss` if validation mode.
+
+    Warning:
+
+        The discriminator needs to have a member function `get_get_ct_results`
+        which returns the second to last output of the discriminator along with
+        the last element.
+
 
     Example:
         >>> trainer = dlt.train.WGANGPTrainer(gen, disc, g_optim, d_optim, lambda_gp)
@@ -51,7 +58,7 @@ class WGANCTTrainer(GANBaseTrainer):
         self.lambda_ct = lambda_ct
         self.alpha = None
         self.gradout = None
-                
+        
     def d_step(self, g_input, real_input):
         for p in self.discriminator.parameters():
             p.requires_grad = True
