@@ -92,7 +92,7 @@ for epoch in range(current_epoch, opt.max_epochs):
             img_grid = dlt.util.make_grid(imgs, color=size[0] == 3)
             dlt.viz.imshow(img_grid, pause=0.02, title='Epoch {0}, Iteration {1}'.format(epoch, i+1))
         # Log the losses
-        log(losses)
+        log(losses['d_loss'])
     # Do some checkpointomg
     epoch_chkp(epoch + 1) # +1 because this epoch has finished
     gen_chkp(generator, tag='epoch-{0}'.format(epoch))
