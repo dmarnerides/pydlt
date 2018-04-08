@@ -21,17 +21,18 @@ class WGANGPTrainer(GANBaseTrainer):
     Each iteration returns the mini-batch and a tuple containing:
 
         - The generator prediction.
-        - A dictionary with:
+        - A dictionary containing a `d_loss` (not when validating) and a 
+          `g_loss` dictionary (only if a generator step is performed):
             
-            - `d_loss`, `w_loss`, `gp` if training mode.
-            - `g_loss` if validation mode.
+            - `d_loss contains`: `d_loss`, `w_loss`, and `gp`.
+            - `g_loss` contains: `g_loss` (and extra_loss if add_loss is used).
 
     Example:
         >>> trainer = dlt.train.WGANGPTrainer(gen, disc, g_optim, d_optim, lambda_gp)
         >>> # Training mode
         >>> trainer.train()
         >>> for batch, (prediction, loss) in trainer(train_data_loader):
-        >>>     print(loss['w_loss'])
+        >>>     print(loss['d_loss']['w_loss'])
     """
     def __init__(self, generator, discriminator, g_optimizer, d_optimizer, lambda_gp, d_iter=1, add_loss=None):
         super(WGANGPTrainer, self).__init__(generator, discriminator, g_optimizer, 
@@ -42,6 +43,8 @@ class WGANGPTrainer(GANBaseTrainer):
         self.lambda_gp = lambda_gp
         self.alpha = None
         self.gradout = None
+        if self.add_loss is not None:
+            self._losses['training'] += ['extra_loss']
                 
     def d_step(self, g_input, real_input):
         for p in self.discriminator.parameters():
@@ -59,9 +62,6 @@ class WGANGPTrainer(GANBaseTrainer):
 
         w_loss = error_fake - error_real
         total_loss = w_loss + gp
-
-        if self.add_loss:
-            total_loss = total_loss + self.add_loss(prediction, Variable(real_input))
         
         total_loss.backward()
         self.d_optimizer.step()
@@ -72,24 +72,39 @@ class WGANGPTrainer(GANBaseTrainer):
         self.d_iter_counter += 1
         return prediction.data, ret_losses
 
-    def g_step(self, g_input):
+    def g_step(self, g_input, real_input):
         for p in self.discriminator.parameters():
             p.requires_grad = False
         if self.training:
             self.generator.zero_grad()
             prediction = self.generator(Variable(g_input))
             error = - self.discriminator(prediction).mean()
-            error.backward()
+            total_loss = error
+            if self.add_loss:
+                extra_loss = self.add_loss(prediction, Variable(real_input))
+                total_loss += extra_loss
+            total_loss.backward()
             self.g_optimizer.step()
         else:
             if self._use_no_grad:
                 with torch.no_grad():
                     prediction = self.generator(Variable(g_input))
                     error = - self.discriminator(prediction).mean()
+                    total_loss = error
+                    if self.add_loss:
+                        extra_loss = self.add_loss(prediction, Variable(real_input))
+                        total_loss += extra_loss
             else:
                 prediction = self.generator(Variable(g_input, volatile=True))
                 error = - self.discriminator(prediction).mean()
-        return prediction.data, {'g_loss': _get_scalar_value(error.data)}
+                total_loss = error
+                if self.add_loss:
+                    extra_loss = self.add_loss(prediction, Variable(real_input))
+                    total_loss += extra_loss
+        ret_loss = {'g_loss': _get_scalar_value(error.data)}
+        if self.add_loss:
+            ret_loss['extra_loss'] = _get_scalar_value(extra_loss.data)
+        return prediction.data, ret_loss
 
 
     def make_alpha(self, real_input):

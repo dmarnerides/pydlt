@@ -28,16 +28,20 @@ class GANBaseTrainer(BaseTrainer):
         self.add_loss = add_loss
 
     def iteration(self, data):
+        losses = {}
         if self.training:
-            ret = self.d_step(data[0], data[1])
+            pred, d_loss = self.d_step(data[0], data[1])
+            losses['d_loss'] = d_loss
             if self.d_iter_counter % self.d_iter == 0:
-                self.g_step(data[0])
-            return ret
+                _, g_loss = self.g_step(data[0], data[1])
+                losses['g_loss'] = g_loss
         else:
-            return self.g_step(data[0])
+            pred, g_loss = self.g_step(data[0], data[1])
+            losses['g_loss'] = g_loss
+        return pred, losses
 
     def d_step(self, g_input, real_input):
         raise NotImplementedError
 
-    def g_step(self, g_input):
+    def g_step(self, g_input, real_input):
         raise NotImplementedError

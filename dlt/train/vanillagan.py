@@ -19,17 +19,18 @@ class VanillaGANTrainer(GANBaseTrainer):
     Each iteration returns the mini-batch and a tuple containing:
 
         - The generator prediction.
-        - A dictionary with:
+        - A dictionary containing a `d_loss` (not when validating) and a 
+          `g_loss` dictionary (only if a generator step is performed):
             
-            - `d_loss`, `real_loss`, `fake_loss` if training mode.
-            - `g_loss` if validation mode.
+            - `d_loss contains`: `d_loss`, `real_loss`, and `fake_loss`.
+            - `g_loss` contains: `g_loss` (and extra_loss if add_loss is used).
 
     Example:
         >>> trainer = dlt.train.VanillaGANTrainer(gen, disc, g_optim, d_optim)
         >>> # Training mode
         >>> trainer.train()
         >>> for batch, (prediction, loss) in trainer(train_data_loader):
-        >>>     print(loss['d_loss'])
+        >>>     print(loss['d_loss']['d_loss'])
 
     Warning:
         This trainer uses BCEWithLogitsLoss, which means that the discriminator
@@ -46,6 +47,8 @@ class VanillaGANTrainer(GANBaseTrainer):
         self.fake_label = 0
         self.bce = torch.nn.BCEWithLogitsLoss()
         self.add_loss = add_loss
+        if self.add_loss is not None:
+            self._losses['training'] += ['extra_loss']
 
     def d_step(self, g_input, real_input):
         batch_size = g_input.size(0)
@@ -66,8 +69,6 @@ class VanillaGANTrainer(GANBaseTrainer):
         loss_real = self.bce(self.discriminator(Variable(real_input)), real_label)
 
         total_loss = loss_fake + loss_real
-        if self.add_loss:
-            total_loss = total_loss + self.add_loss(prediction, Variable(real_input))
         total_loss.backward()
         self.d_optimizer.step()
 
@@ -78,7 +79,7 @@ class VanillaGANTrainer(GANBaseTrainer):
         return prediction.data, ret_losses
 
 
-    def g_step(self, g_input):
+    def g_step(self, g_input, real_input):
         batch_size = g_input.size(0)
         for p in self.discriminator.parameters():
             p.requires_grad = False
@@ -89,7 +90,11 @@ class VanillaGANTrainer(GANBaseTrainer):
             d_prediction = self.discriminator(prediction)
             labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
             error = self.bce(d_prediction, labelv)
-            error.backward()
+            total_loss = error
+            if self.add_loss:
+                extra_loss = self.add_loss(prediction, Variable(real_input))
+                total_loss += extra_loss
+            total_loss.backward()
             self.g_optimizer.step()
         else:
             if self._use_no_grad:
@@ -99,11 +104,22 @@ class VanillaGANTrainer(GANBaseTrainer):
                     d_prediction = self.discriminator(prediction)
                     labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
                     error = self.bce(d_prediction, labelv)
+                    total_loss = error
+                    if self.add_loss:
+                        extra_loss = self.add_loss(prediction, Variable(real_input))
+                        total_loss += extra_loss
             else:
                 prediction = self.generator(Variable(g_input, volatile=True))
                 # fake labels are real for generator cost
                 d_prediction = self.discriminator(prediction)
                 labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
                 error = self.bce(d_prediction, labelv)
+                total_loss = error
+                if self.add_loss:
+                    extra_loss = self.add_loss(prediction, Variable(real_input))
+                    total_loss += extra_loss
 
-        return prediction.data, {'g_loss': _get_scalar_value(error.data)}
+        ret_loss = {'g_loss': _get_scalar_value(error.data)}
+        if self.add_loss:
+            ret_loss['extra_loss'] = _get_scalar_value(extra_loss.data)
+        return prediction.data, ret_loss

@@ -20,18 +20,20 @@ class FisherGANTrainer(GANBaseTrainer):
     Each iteration returns the mini-batch and a tuple containing:
 
         - The generator prediction.
-        - A dictionary with:
+        - A dictionary containing a `d_loss` (not when validating) and a 
+          `g_loss` dictionary (only if a generator step is performed):
             
-            - `ipm_enum`, `ipm_denom`, `ipm_ratio`, `d_loss`, `constraint`,
-              `epf`, `eqf`, `epf2`, `eqf2` and `lagrange` if training mode.
-            - `g_loss` if validation mode.
+            - `d_loss contains`: `ipm_enum`, `ipm_denom`, `ipm_ratio`, 
+              `d_loss`, `constraint`, `epf`, `eqf`, `epf2`, `eqf2` and
+              `lagrange`.
+            - `g_loss` contains: `g_loss` (and extra_loss if add_loss is used).
 
     Example:
         >>> trainer = dlt.train.FisherGANTrainer(gen, disc, g_optim, d_optim, rho)
         >>> # Training mode
         >>> trainer.train()
         >>> for batch, (prediction, loss) in trainer(train_data_loader):
-        >>>     print(loss['constraint'])
+        >>>     print(loss['d_loss']['constraint'])
     """
     def __init__(self, generator, discriminator, g_optimizer, d_optimizer, rho, d_iter=1, add_loss=None):
         super(FisherGANTrainer, self).__init__(generator, discriminator, g_optimizer, 
@@ -42,6 +44,8 @@ class FisherGANTrainer(GANBaseTrainer):
         self._losses['validation'] = ['g_loss']
         self.rho = rho
         self.alpha = None
+        if self.add_loss is not None:
+            self._losses['training'] += ['extra_loss']
 
     def d_step(self, g_input, real_input):
         for p in self.discriminator.parameters():
@@ -64,9 +68,6 @@ class FisherGANTrainer(GANBaseTrainer):
         constraint = (1- (0.5*epf2 + 0.5*eqf2))
         d_loss = -(epf - eqf + self.alpha*constraint - self.rho/2 * constraint**2)
         
-        if self.add_loss:
-            d_loss = d_loss + self.add_loss(prediction, Variable(real_input))
-
         d_loss.backward()
         self.d_optimizer.step()
         self.alpha.data += self.rho * self.alpha.grad.data
@@ -88,21 +89,36 @@ class FisherGANTrainer(GANBaseTrainer):
         self.d_iter_counter += 1
         return prediction.data, ret_losses
 
-    def g_step(self, g_input):
+    def g_step(self, g_input, real_input):
         for p in self.discriminator.parameters():
             p.requires_grad = False
         if self.training:
             self.generator.zero_grad()
             prediction = self.generator(Variable(g_input))
             error = - self.discriminator(prediction).mean()
-            error.backward()
+            total_loss = error
+            if self.add_loss:
+                extra_loss = self.add_loss(prediction, Variable(real_input))
+                total_loss += extra_loss
+            total_loss.backward()
             self.g_optimizer.step()
         else:
             if self._use_no_grad:
                 with torch.no_grad():
                     prediction = self.generator(Variable(g_input))
                     error = - self.discriminator(prediction).mean()
+                    total_loss = error
+                    if self.add_loss:
+                        extra_loss = self.add_loss(prediction, Variable(real_input))
+                        total_loss += extra_loss
             else:
                 prediction = self.generator(Variable(g_input, volatile=True))
                 error = - self.discriminator(prediction).mean()
-        return prediction.data, {'g_loss': _get_scalar_value(error.data)}
+                total_loss = error
+                if self.add_loss:
+                    extra_loss = self.add_loss(prediction, Variable(real_input))
+                    total_loss += extra_loss
+        ret_loss = {'g_loss': _get_scalar_value(error.data)}
+        if self.add_loss:
+            ret_loss['extra_loss'] = _get_scalar_value(extra_loss.data)
+        return prediction.data, ret_loss
