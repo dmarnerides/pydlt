@@ -178,7 +178,7 @@ def fetch_opts(categories, subset=None):
             subset = subset
         else:
             subset = None
-        postfix = '_{0}'.format(subset) if subset else ''
+        postfix = '_{0}'.format(subset) if subset is not None and subset != '' else ''
         names = parse.default_avail_params[category]
         current = AttrDict({name: getattr(opt, name + postfix) if hasattr(opt, name + postfix) else getattr(opt, name) for name in names})
         ret.update(current)
