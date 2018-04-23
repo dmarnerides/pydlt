@@ -26,7 +26,8 @@ def model_checkpointer(model, subset=None):
     opts = fetch_opts(['general', 'model'], subset)
     name = subset['model'] if isinstance(subset, dict) else subset
     model_chkp = Checkpointer('{0}_{1}weights'.format(opts.experiment_name, '' if name is None else name + '_'),
-                                  directory=opts.save_path, overwrite=opts.overwrite_weights, timestamp=False, add_count=True)
+                                  directory=opts.save_path, overwrite=opts.overwrite_model_chkp,
+                                  timestamp=opts.timestamp_model_chkp, add_count=opts.count_model_chkp)
     model_chkp.load(model)
     print('{0}\n{1}\n{0}\n{2}\nParameters: {3}\n{0}'.format('-'*80, name.capitalize() if name is not None else 'Model', model, count_parameters(model)))
     return model_chkp

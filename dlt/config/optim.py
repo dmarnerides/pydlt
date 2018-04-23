@@ -1,5 +1,5 @@
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR
+from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, LambdaLR
 from ..util import Checkpointer
 from .opts import fetch_opts, parse
 
@@ -21,7 +21,7 @@ def optimizer(model, subset=None):
         from the built-in ones. If :func:`dlt.config.parse` was not called in the 
         main script, this function will call it.
     """
-    opts = fetch_opts(categories=['optimizer'], subset=subset)
+    opts = fetch_opts(categories=['general', 'optimizer'], subset=subset)
 
     if opts.optimizer not in parse.optimizers:
         raise ValueError('Optimizer {0} not available.'.format(opts.optimizer))
@@ -49,7 +49,14 @@ def optimizer(model, subset=None):
         ret_optimizer = torch.optim.RMSprop(grad_params, lr=opts.lr,
             alpha=opts.alpha, eps=opts.optim_eps, weight_decay=opts.weight_decay,
             momentum=opts.momentum, centered=opts.centered)
-    return ret_optimizer
+
+    name = subset['optimizer'] if isinstance(subset, dict) else subset
+    optim_chkp = Checkpointer('{0}_{1}optimizer'.format(opts.experiment_name, '' if name is None else name + '_'),
+                                  directory=opts.save_path, overwrite=opts.overwrite_optimizer_chkp,
+                                  timestamp=opts.timestamp_optimizer_chkp, add_count=opts.count_optimizer_chkp)
+    optim_chkp.load(ret_optimizer)
+
+    return ret_optimizer, optim_chkp
 
 def scheduler(optimizer, subset=None):
     """Returns a scheduler callable closure which accepts one argument.
@@ -76,17 +83,19 @@ def scheduler(optimizer, subset=None):
         ret_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=opts.lr_ratio, threshold=0.0001,
                                     patience=opts.lr_patience, verbose=True, threshold_mode='rel',
                                     cooldown=opts.lr_cooldown, min_lr=opts.lr_min, eps=1e-08)
-        def schedule_fn(metric):
-            ret_scheduler.step(metric)
     elif opts.lr_schedule == 'step':
         ret_scheduler = StepLR(optimizer, step_size=opts.lr_step_size, gamma=opts.lr_ratio)
-        def schedule_fn(metric):
-                ret_scheduler.step()
     elif opts.lr_schedule == 'none':
-        def schedule_fn(metric):
-            pass
+        ret_scheduler = LambdaLR(optimizer, lr_lambda=lambda x: 1)
     
-    def schedule_step(metric):
+    if opts.lr_schedule == 'plateau':
+        def schedule_fn(metric):
+            ret_scheduler.step(metric)
+    else:
+        def schedule_fn(metric):
+            ret_scheduler.step()
+    
+    def schedule_step(metric=None):
         current_lr = optimizer.param_groups[0]['lr']
         schedule_fn(metric)
         new_lr = optimizer.param_groups[0]['lr']
@@ -95,7 +104,13 @@ def scheduler(optimizer, subset=None):
             name = ' ({0})'.format(name) if name else ''
             print('Learning rate{0} changed from {1:.2e} to {2:.2e}'.format(name, current_lr, new_lr))
 
-    return schedule_step
+    name = subset['scheduler'] if isinstance(subset, dict) else subset
+    scheduler_chkp = Checkpointer('{0}_{1}scheduler'.format(opts.experiment_name, '' if name is None else name + '_'),
+                                  directory=opts.save_path, overwrite=opts.overwrite_scheduler_chkp,
+                                  timestamp=opts.timestamp_scheduler_chkp, add_count=opts.count_scheduler_chkp)
+    scheduler_chkp.load(ret_scheduler)
+
+    return schedule_step, scheduler_chkp
 
 def epoch_checkpointer(subset=None):
     """Returns epoch checkpointer and current epoch. Configurable using command line arguments.
