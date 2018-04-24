@@ -113,8 +113,10 @@ def scheduler(optimizer, subset=None):
                                   directory=opts.save_path, overwrite=opts.overwrite_scheduler_chkp,
                                   timestamp=opts.timestamp_scheduler_chkp, add_count=opts.count_scheduler_chkp)
     scheduler_chkp.load(ret_scheduler)
+    def scheduler_checkpointing():
+        scheduler_chkp(ret_scheduler)
 
-    return schedule_step, scheduler_chkp
+    return schedule_step, scheduler_checkpointing
 
 def epoch_checkpointer(subset=None):
     """Returns epoch checkpointer and current epoch. Configurable using command line arguments.
