@@ -82,7 +82,7 @@ def scheduler(optimizer, subset=None):
         from the built-in ones. If :func:`dlt.config.parse` was not called in the 
         main script, this function will call it.
     """
-    opts = fetch_opts(categories=['scheduler'], subset=subset)
+    opts = fetch_opts(categories=['general', 'scheduler'], subset=subset)
     if opts.lr_schedule == 'plateau':
         ret_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=opts.lr_ratio, threshold=0.0001,
                                     patience=opts.lr_patience, verbose=True, threshold_mode='rel',
