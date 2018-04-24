@@ -61,7 +61,7 @@ def optimizer(model, subset=None):
     return ret_optimizer, optim_chkp
 
 def scheduler(optimizer, subset=None):
-    """Returns a scheduler callable closure which accepts one argument, along with a scheduler checkpointer.
+    """Returns a scheduler callable closure which accepts one argument.
     
     Configurable using command line arguments.
     
@@ -74,15 +74,13 @@ def scheduler(optimizer, subset=None):
 
         - **scheduler**: `--lr_schedule`, `--lr_step_size`, `--lr_patience`,
             `--lr_cooldown`, `--lr_ratio`, `--lr_min`,
-            `--overwrite_scheduler_chkp`, `--timestamp_scheduler_chkp`,
-            `--count_scheduler_chkp`.
 
     Note:
         Settings are automatically acquired from a call to :func:`dlt.config.parse`
         from the built-in ones. If :func:`dlt.config.parse` was not called in the 
         main script, this function will call it.
     """
-    opts = fetch_opts(categories=['general', 'scheduler'], subset=subset)
+    opts = fetch_opts(categories=['scheduler'], subset=subset)
     if opts.lr_schedule == 'plateau':
         ret_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=opts.lr_ratio, threshold=0.0001,
                                     patience=opts.lr_patience, verbose=True, threshold_mode='rel',
@@ -108,15 +106,8 @@ def scheduler(optimizer, subset=None):
             name = ' ({0})'.format(name) if name else ''
             print('Learning rate{0} changed from {1:.2e} to {2:.2e}'.format(name, current_lr, new_lr))
 
-    name = subset['scheduler'] if isinstance(subset, dict) else subset
-    scheduler_chkp = Checkpointer('{0}_{1}scheduler'.format(opts.experiment_name, '' if name is None else name + '_'),
-                                  directory=opts.save_path, overwrite=opts.overwrite_scheduler_chkp,
-                                  timestamp=opts.timestamp_scheduler_chkp, add_count=opts.count_scheduler_chkp)
-    scheduler_chkp.load(ret_scheduler)
-    def scheduler_checkpointing():
-        scheduler_chkp(ret_scheduler)
 
-    return schedule_step, scheduler_checkpointing
+    return schedule_step
 
 def epoch_checkpointer(subset=None):
     """Returns epoch checkpointer and current epoch. Configurable using command line arguments.
