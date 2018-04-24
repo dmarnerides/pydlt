@@ -7,6 +7,7 @@ class BaseTrainer(object):
         self.training = True
         self.use_gpu = False
         self._models = {}
+        self._optimizers = {}
         self._losses = {}
         # Compatibility patching volatile / torch.no_grad() !
         # Will remove it once 0.4 is released
@@ -79,3 +80,26 @@ class BaseTrainer(object):
         return
 
     __call__ = iterate
+
+    def __getstate__(self):
+        return self.state_dict()
+
+    def __setstate__(self, state):
+        self.load_state_dict(state)
+
+    def state_dict(self):
+        """Returns the state of the trainer as a :class:`dict`.
+
+        It contains an entry for every variable in self.__dict__ which
+        is not the one of the models or optimizers.
+        """
+        return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
+
+    def load_state_dict(self, state_dict):
+        """Loads the trainers state.
+
+        Arguments:
+            state_dict (dict): scheduler state. Should be an object returned
+                from a call to :meth:`state_dict`.
+        """
+        self.__dict__.update(state_dict)

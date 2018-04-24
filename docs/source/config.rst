@@ -84,6 +84,14 @@ Optimization
 
 .. autofunction:: lr_checkpointer
 
+Training
+--------------------------
+
+:hidden:`trainer_checkpointer`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: trainer_checkpointer
+
 Misc
 --------------------------
 

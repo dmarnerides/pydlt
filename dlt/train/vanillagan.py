@@ -52,25 +52,25 @@ class VanillaGANTrainer(GANBaseTrainer):
 
     def d_step(self, g_input, real_input):
         batch_size = g_input.size(0)
-        for p in self.discriminator.parameters():
+        for p in self._models['discriminator'].parameters():
             p.requires_grad = True
-        self.discriminator.zero_grad()
+        self._models['discriminator'].zero_grad()
 
         if self._use_no_grad:
             with torch.no_grad():
-                t_pred = self.generator(Variable(g_input)).data
+                t_pred = self._models['generator'](Variable(g_input)).data
             prediction = Variable(t_pred)
         else:
-            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
+            prediction = Variable(self._models['generator'](Variable(g_input, volatile=True)).data)
         real_label = Variable(prediction.data.new(batch_size,1).fill_(self.real_label))
         fake_label = Variable(prediction.data.new(batch_size,1).fill_(self.fake_label))
 
-        loss_fake = self.bce(self.discriminator(prediction), fake_label)
-        loss_real = self.bce(self.discriminator(Variable(real_input)), real_label)
+        loss_fake = self.bce(self._models['discriminator'](prediction), fake_label)
+        loss_real = self.bce(self._models['discriminator'](Variable(real_input)), real_label)
 
         total_loss = loss_fake + loss_real
         total_loss.backward()
-        self.d_optimizer.step()
+        self._optimizers['discriminator'].step()
 
         ret_losses = {'d_loss': _get_scalar_value(total_loss.data), 
                       'real_loss': _get_scalar_value(loss_real.data), 
@@ -81,13 +81,13 @@ class VanillaGANTrainer(GANBaseTrainer):
 
     def g_step(self, g_input, real_input):
         batch_size = g_input.size(0)
-        for p in self.discriminator.parameters():
+        for p in self._models['discriminator'].parameters():
             p.requires_grad = False
         if self.training:
-            self.generator.zero_grad()
-            prediction = self.generator(Variable(g_input))
+            self._models['generator'].zero_grad()
+            prediction = self._models['generator'](Variable(g_input))
             # fake labels are real for generator cost
-            d_prediction = self.discriminator(prediction)
+            d_prediction = self._models['discriminator'](prediction)
             labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
             error = self.bce(d_prediction, labelv)
             total_loss = error
@@ -95,13 +95,13 @@ class VanillaGANTrainer(GANBaseTrainer):
                 extra_loss = self.add_loss(prediction, Variable(real_input))
                 total_loss += extra_loss
             total_loss.backward()
-            self.g_optimizer.step()
+            self._optimizers['generator'].step()
         else:
             if self._use_no_grad:
                 with torch.no_grad:
-                    prediction = self.generator(Variable(g_input))
+                    prediction = self._models['generator'](Variable(g_input))
                     # fake labels are real for generator cost
-                    d_prediction = self.discriminator(prediction)
+                    d_prediction = self._models['discriminator'](prediction)
                     labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
                     error = self.bce(d_prediction, labelv)
                     total_loss = error
@@ -109,9 +109,9 @@ class VanillaGANTrainer(GANBaseTrainer):
                         extra_loss = self.add_loss(prediction, Variable(real_input))
                         total_loss += extra_loss
             else:
-                prediction = self.generator(Variable(g_input, volatile=True))
+                prediction = self._models['generator'](Variable(g_input, volatile=True))
                 # fake labels are real for generator cost
-                d_prediction = self.discriminator(prediction)
+                d_prediction = self._models['discriminator'](prediction)
                 labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
                 error = self.bce(d_prediction, labelv)
                 total_loss = error

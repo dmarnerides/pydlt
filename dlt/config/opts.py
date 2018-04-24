@@ -232,6 +232,9 @@ parse.param_dict = {
     'gpu': [dict(flags=['--use_gpu'], type=str2bool, default=True, help='Use GPU'),
             dict(flags=['--device'], type=int, default=0, help='GPU device ID'),
             dict(flags=['--cudnn_benchmark'], type=str2bool, default=True, help='Use cudnn benchmark mode')],
+    'trainer': [ dict(flags=['--overwrite_trainer_chkp'], type=str2bool, default=True, help='Overwrite trainer checkpoints'),
+               dict(flags=['--timestamp_trainer_chkp'], type=str2bool, default=False, help='Add timestamp to trainer checkpoints'),
+               dict(flags=['--count_trainer_chkp'], type=str2bool, default=True, help='Add count to trainer checkpoints') ],
     'samples': [dict(flags=['--save_samples'], type=str2bool, default=False, help='Save samples'),
                 dict(flags=['--sample_freq'], type=int, default=1, help='Iterations per sample')]
 }

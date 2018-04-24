@@ -47,24 +47,24 @@ class WGANGPTrainer(GANBaseTrainer):
             self._losses['training'] += ['extra_loss']
                 
     def d_step(self, g_input, real_input):
-        for p in self.discriminator.parameters():
+        for p in self._models['discriminator'].parameters():
             p.requires_grad = True
-        self.discriminator.zero_grad()
+        self._models['discriminator'].zero_grad()
         if self._use_no_grad:
             with torch.no_grad():
-                t_pred = self.generator(Variable(g_input)).data
+                t_pred = self._models['generator'](Variable(g_input)).data
             prediction = Variable(t_pred)
         else:
-            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
-        error_fake = self.discriminator(prediction).mean()
-        error_real = self.discriminator(Variable(real_input)).mean()
+            prediction = Variable(self._models['generator'](Variable(g_input, volatile=True)).data)
+        error_fake = self._models['discriminator'](prediction).mean()
+        error_real = self._models['discriminator'](Variable(real_input)).mean()
         gp = self.get_gp(prediction.data, real_input)
 
         w_loss = error_fake - error_real
         total_loss = w_loss + gp
         
         total_loss.backward()
-        self.d_optimizer.step()
+        self._optimizers['discriminator'].step()
 
         ret_losses = {'w_loss': _get_scalar_value(w_loss.data),
                       'gp': _get_scalar_value(gp.data),
@@ -73,30 +73,30 @@ class WGANGPTrainer(GANBaseTrainer):
         return prediction.data, ret_losses
 
     def g_step(self, g_input, real_input):
-        for p in self.discriminator.parameters():
+        for p in self._models['discriminator'].parameters():
             p.requires_grad = False
         if self.training:
-            self.generator.zero_grad()
-            prediction = self.generator(Variable(g_input))
-            error = - self.discriminator(prediction).mean()
+            self._models['generator'].zero_grad()
+            prediction = self._models['generator'](Variable(g_input))
+            error = - self._models['discriminator'](prediction).mean()
             total_loss = error
             if self.add_loss:
                 extra_loss = self.add_loss(prediction, Variable(real_input))
                 total_loss += extra_loss
             total_loss.backward()
-            self.g_optimizer.step()
+            self._optimizers['generator'].step()
         else:
             if self._use_no_grad:
                 with torch.no_grad():
-                    prediction = self.generator(Variable(g_input))
-                    error = - self.discriminator(prediction).mean()
+                    prediction = self._models['generator'](Variable(g_input))
+                    error = - self._models['discriminator'](prediction).mean()
                     total_loss = error
                     if self.add_loss:
                         extra_loss = self.add_loss(prediction, Variable(real_input))
                         total_loss += extra_loss
             else:
-                prediction = self.generator(Variable(g_input, volatile=True))
-                error = - self.discriminator(prediction).mean()
+                prediction = self._models['generator'](Variable(g_input, volatile=True))
+                error = - self._models['discriminator'](prediction).mean()
                 total_loss = error
                 if self.add_loss:
                     extra_loss = self.add_loss(prediction, Variable(real_input))
@@ -123,7 +123,7 @@ class WGANGPTrainer(GANBaseTrainer):
     def get_gp(self, fake_input, real_input):
         self.make_alpha(real_input)
         interpolates = Variable(self.alpha * real_input + ((1 - self.alpha) * fake_input), requires_grad=True)
-        disc_interpolates = self.discriminator(interpolates)
+        disc_interpolates = self._models['discriminator'](interpolates)
         self.make_grad_out(disc_interpolates.data)
         gradients = autograd.grad(outputs=disc_interpolates, inputs=interpolates,
                                   grad_outputs=self.gradout,

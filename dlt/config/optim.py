@@ -4,7 +4,7 @@ from ..util import Checkpointer
 from .opts import fetch_opts, parse
 
 def optimizer(model, subset=None):
-    """Returns the optimizer for the given model. Configurable using command line arguments.
+    """Returns the optimizer for the given model, along with an optimizer checkpointer.
     
     Args:
         model (nn.Module): The network for the optimizer.
@@ -14,7 +14,9 @@ def optimizer(model, subset=None):
     Relevant Command Line Arguments:
 
         - **optimizer**: `--optimizer`, `--lr`, `--momentum`,
-            `--dampening`, `--beta1`, `--beta2`, `--weight_decay`.
+            `--dampening`, `--beta1`, `--beta2`, `--weight_decay`,
+            `--overwrite_optimizer_chkp`, `--timestamp_optimizer_chkp`,
+            `--count_optimizer_chkp`.
 
     Note:
         Settings are automatically acquired from a call to :func:`dlt.config.parse`
@@ -59,7 +61,7 @@ def optimizer(model, subset=None):
     return ret_optimizer, optim_chkp
 
 def scheduler(optimizer, subset=None):
-    """Returns a scheduler callable closure which accepts one argument.
+    """Returns a scheduler callable closure which accepts one argument, along with a scheduler checkpointer.
     
     Configurable using command line arguments.
     
@@ -71,7 +73,9 @@ def scheduler(optimizer, subset=None):
     Relevant Command Line Arguments:
 
         - **scheduler**: `--lr_schedule`, `--lr_step_size`, `--lr_patience`,
-            `--lr_cooldown`, `--lr_ratio`, `--lr_min`.
+            `--lr_cooldown`, `--lr_ratio`, `--lr_min`,
+            `--overwrite_scheduler_chkp`, `--timestamp_scheduler_chkp`,
+            `--count_scheduler_chkp`.
 
     Note:
         Settings are automatically acquired from a call to :func:`dlt.config.parse`

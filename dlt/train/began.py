@@ -51,23 +51,23 @@ class BEGANTrainer(GANBaseTrainer):
             self._losses['training'] += ['extra_loss']
 
     def d_step(self, g_input, real_input):
-        for p in self.discriminator.parameters():
+        for p in self._models['discriminator'].parameters():
             p.requires_grad = True
-        self.discriminator.zero_grad()
+        self._models['discriminator'].zero_grad()
         if self._use_no_grad:
             with torch.no_grad():
-                t_pred = self.generator(Variable(g_input)).data
+                t_pred = self._models['generator'](Variable(g_input)).data
             prediction = Variable(t_pred)
         else:
-            prediction = Variable(self.generator(Variable(g_input, volatile=True)).data)
-        fake_loss = (self.discriminator(prediction) - prediction).abs().mean()
+            prediction = Variable(self._models['generator'](Variable(g_input, volatile=True)).data)
+        fake_loss = (self._models['discriminator'](prediction) - prediction).abs().mean()
         v_real_input = Variable(real_input)
-        real_loss = (self.discriminator(v_real_input) - v_real_input).abs().mean()
+        real_loss = (self._models['discriminator'](v_real_input) - v_real_input).abs().mean()
         
         d_loss = real_loss - self.k*fake_loss
         
         d_loss.backward()
-        self.d_optimizer.step()
+        self._optimizers['discriminator'].step()
 
         balance = (self.gamma * _get_scalar_value(real_loss.data) - _get_scalar_value(fake_loss.data))
         self.k = min(max(self.k + self.lambda_k*balance, 0), 1)
@@ -81,30 +81,30 @@ class BEGANTrainer(GANBaseTrainer):
         return prediction.data, ret_losses
 
     def g_step(self, g_input, real_input):
-        for p in self.discriminator.parameters():
+        for p in self._models['discriminator'].parameters():
             p.requires_grad = False
         if self.training:
-            self.generator.zero_grad()
-            prediction = self.generator(Variable(g_input))
-            error = (self.discriminator(prediction) - prediction).abs().mean()
+            self._models['generator'].zero_grad()
+            prediction = self._models['generator'](Variable(g_input))
+            error = (self._models['discriminator'](prediction) - prediction).abs().mean()
             total_loss = error
             if self.add_loss:
                 extra_loss = self.add_loss(prediction, Variable(real_input))
                 total_loss += extra_loss
             total_loss.backward()
-            self.g_optimizer.step()
+            self._optimizers['generator'].step()
         else:
             if self._use_no_grad:
                 with torch.no_grad():
-                    prediction = self.generator(Variable(g_input))
-                    error = (self.discriminator(prediction) - prediction).abs().mean()
+                    prediction = self._models['generator'](Variable(g_input))
+                    error = (self._models['discriminator'](prediction) - prediction).abs().mean()
                     total_loss = error
                     if self.add_loss:
                         extra_loss = self.add_loss(prediction, Variable(real_input))
                         total_loss += extra_loss
             else:
-                prediction = self.generator(Variable(g_input, volatile=True))
-                error = (self.discriminator(prediction) - prediction).abs().mean()
+                prediction = self._models['generator'](Variable(g_input, volatile=True))
+                error = (self._models['discriminator'](prediction) - prediction).abs().mean()
                 total_loss = error
                 if self.add_loss:
                     extra_loss = self.add_loss(prediction, Variable(real_input))

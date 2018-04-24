@@ -15,7 +15,7 @@ def model_checkpointer(model, subset=None):
     Relevant Command Line Arguments:
 
         - **general**: `--experiment_name`, `--save_path`.
-        - **model**: `--overwrite_weights`.
+        - **model**: `--overwrite_model_chkp`, `--timestamp_model_chkp`, `--count_model_chkp`.
 
     Note:
         Settings are automatically acquired from a call to :func:`dlt.config.parse`

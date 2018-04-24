@@ -31,33 +31,34 @@ class VanillaTrainer(BaseTrainer):
         super(VanillaTrainer, self).__init__()
         # Register models and losses
         self._models['model'] = model
+        self._optimizers['optimizer'] = optimizer
+        
         self._losses['training'] = ['training_loss']
         self._losses['validation'] = ['validation_loss']
-        self.model = model
+
         self.criterion = criterion
-        self.optimizer = optimizer
 
     def iteration(self, data):
 
         if self.training:
             v_input = Variable(data[0])
             v_output = Variable(data[1])
-            v_pred = self.model(v_input)
+            v_pred = self._models['model'](v_input)
             loss = self.criterion(v_pred, v_output)
-            self.optimizer.zero_grad()
+            self._optimizers['optimizer'].zero_grad()
             loss.backward()
-            self.optimizer.step()
+            self._optimizers['optimizer'].step()
         else:
             if self._use_no_grad:
                 with torch.no_grad():
                     v_input = Variable(data[0])
                     v_output = Variable(data[1])
-                    v_pred = self.model(v_input)
+                    v_pred = self._models['model'](v_input)
                     loss = self.criterion(v_pred, v_output)
             else:
                 v_input = Variable(data[0], volatile=True)
                 v_output = Variable(data[1], volatile=True)
-                v_pred = self.model(v_input)
+                v_pred = self._models['model'](v_input)
                 loss = self.criterion(v_pred, v_output)
         key = 'training_loss' if self.training else 'validation_loss'
         return v_pred.data, {key: _get_scalar_value(loss.data)}

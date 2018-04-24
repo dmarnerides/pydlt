@@ -19,10 +19,9 @@ class GANBaseTrainer(BaseTrainer):
         # Register models
         self._models['generator'] = generator
         self._models['discriminator'] = discriminator
-        self.generator = generator
-        self.discriminator = discriminator
-        self.g_optimizer = g_optimizer
-        self.d_optimizer = d_optimizer
+        self._optimizers['generator'] = g_optimizer
+        self._optimizers['discriminator'] = d_optimizer
+
         self.d_iter = d_iter
         self.d_iter_counter = 0
         self.add_loss = add_loss
