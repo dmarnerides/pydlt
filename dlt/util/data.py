@@ -38,7 +38,7 @@ class LoadedDataset(Dataset):
         return len(self.dataset)
 
 class DirectoryDataset(Dataset):
-    """Creates a dataset recursively (no structure requirement).
+    """Creates a dataset of images (no label) recursively (no structure requirement).
     
     Similar to `torchvision.datasets.FolderDataset`, however there is no need for
     a specific directory structure, or data format.

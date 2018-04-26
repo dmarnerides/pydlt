@@ -102,9 +102,8 @@ def slide_window_(a, kernel, stride=None):
         a.set_(a.storage(), storage_offset=0, size=new_shape, stride=new_stride)
         return a
 
-# TODO: Add example
 def re_stride(a, kernel, stride=None):
-    """Returns a re-shaped and re-strided tensor/variable given a kernel (uses as_strided).
+    """Returns a re-shaped and re-strided Rensor given a kernel (uses as_strided).
 
     Args:
         a (Tensor): The Tensor to re-stride.
@@ -131,7 +130,7 @@ def replicate(x, dim=-3, nrep=3):
         dim (int, optional): New dimension where replication happens.
         nrep (int, optional): Number of replications.
     """
-    if is_tensor(x) or is_variable(x):
+    if is_tensor(x):
         return x.unsqueeze(dim).expand(*x.size()[:dim + 1],nrep,*x.size()[dim + 1:])
     else:
         return np.repeat(np.expand_dims(x,dim), nrep, axis=dim)
@@ -246,12 +245,8 @@ def map_range(x, low=0, high=1):
     else:
         xmax, xmin = x.max(), x.min()
         if xmax - xmin == 0:
-            return x.clone().fill_(0)
+            return x.data.clone().fill_(0)
         return x.add(-xmin).div_(xmax-xmin).mul_(high-low).add_(low).clamp_(low, high)
-
-def is_variable(x):
-    """Checks if input is a Variable instance."""
-    return isinstance(x, torch.autograd.Variable)
 
 # This was added to torch in v0.3. Keeping it here too.
 def is_tensor(x):
@@ -268,18 +263,16 @@ def is_array(x):
 
 ## Returns a numpy array version of x
 def to_array(x):
-    """Converts x to a Numpy Array.
+    """Converts x to a Numpy Array. Returns a copy of the data.
     
     Args:
-        x (Variable, Tensor or Array): Input to be converted. Can also be on the GPU.
+        x (Tensor or Array): Input to be converted. Can also be on the GPU.
 
-    Automatically gets the data from torch Variables and casts GPU Tensors
+    Automatically gets the data from torch Tensors and casts GPU Tensors
     to CPU.
     """
-    if is_variable(x):
-        x = x.data.clone()
     if is_cuda(x):
-        x = x.cpu()
+        x = x.data.cpu()
     if is_tensor(x):
         return x.numpy()
     else:
@@ -287,25 +280,22 @@ def to_array(x):
 
 ## Returns a cpu tensor COPY version of x
 def to_tensor(x):
-    """Converts x to a Torch Tensor (CPU).
+    """Converts x to a Torch Tensor (CPU). Returns a copy of the data if x is a Tensor.
     
     Args:
-        x (Variable, Tensor or Array): Input to be converted. Can also be on the GPU.
+        x (Tensor or Array): Input to be converted. Can also be on the GPU.
 
-    Automatically gets the data from torch Variables and casts GPU Tensors to cpu.
-    to CPU.
+    Automatically casts GPU Tensors to CPU.
     """
-    if is_variable(x):
-        return x.data.cpu().clone()
     if is_cuda(x):
-        return x.cpu()
+        return x.data.cpu()
     if is_array(x):
         return torch.from_numpy(x)
     else:
-        return x.clone()
+        return x.data.clone()
 
 ########
-### Variables, tensors, arrays, cuda, cpu, image views etc
+### Tensors, arrays, cuda, cpu, image views etc
 ########
 def permute(x, perm):
     """Permutes the last three dimensions of the input Tensor or Array.
@@ -319,7 +309,7 @@ def permute(x, perm):
     """
     if is_tensor(x):
         if x.dim() < 3:
-            return x.clone()
+            return x.data.clone()
         else:     
             s = tuple(range(0, x.dim()))
             permutation = s[:-3] + tuple(s[-3:][i] for i in perm)
@@ -361,10 +351,10 @@ def channel_flip(x, dim=-3):
         If the input has less than three dimensions a copy is returned.
     """
 
-    if is_tensor(x) or is_variable(x):
+    if is_tensor(x):
         dim = x.dim() + dim if dim < 0 else dim
         if x.dim() < 3:
-            return x.clone()
+            return x.data.clone()
         return x[tuple(slice(None, None) if i != dim
                  else torch.arange(x.size(i)-1, -1, -1).long()
                  for i in range(x.dim()))]
@@ -439,7 +429,7 @@ def change_view(x, current, new):
         if is_array(x):
             return x.copy()
         else:
-            return x.clone()
+            return x.data.clone()
 
     if curr_name == 'opencv':
         if new_name == 'torch':
@@ -512,31 +502,3 @@ def torch2plt(x):
     For more detail see :func:`change_view`
     """
     return change_view(to_array(x), 'torch', 'plt')
-
-
-# Functions for backward/forward compatibility..!
-def _get_torch_version():
-    class VRS(object):
-        def __init__(self, major, minor):
-            self.major = major
-            self.minor = minor
-    try:
-        vrs_split = torch.__version__.split('.')
-        major = vrs_split[0]
-        minor = vrs_split[1]
-    except:
-        print('Unknown torch version')
-        return VRS(-1, -1)
-    if major[0] == 'v':
-        major = int(major[1:])
-    else:
-        major = int(major)
-    minor = int(minor)
-    return VRS(major, minor)
-
-_torch_version = _get_torch_version()
-
-if _torch_version.minor > 3 and _torch_version.major == 0:
-    _get_scalar_value = lambda x: x.item()
-else:
-    _get_scalar_value = lambda x: x[0]

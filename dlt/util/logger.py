@@ -1,7 +1,7 @@
 from os import path
 import logging
 from .paths import process
-from .misc import is_tensor, is_variable, _get_scalar_value
+from .misc import is_tensor
 
 class Logger(object):
     """Logs values in a csv file.
@@ -43,9 +43,6 @@ class Logger(object):
         Args:
             values (dict): Dictionary containing the names and values.
         """
-        for key, val in values.items():
-            if is_variable(val):
-                values[key] = _get_scalar_value(val.data)
-            if is_tensor(val):
-                values[key] = _get_scalar_value(val)
-        self.logger.info('', extra=values)
+        self.logger.info('', extra={key: val.item() if is_tensor(val) else val 
+                                    for key, val in values.items()})
+        

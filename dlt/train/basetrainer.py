@@ -1,29 +1,26 @@
+import torch
 from ..util import barit
-from ..util.misc import _torch_version
 
 class BaseTrainer(object):
     """Generic Base trainer object to inherit functionality from."""
     def __init__(self):
         self.training = True
-        self.use_gpu = False
+        self.device = 'cpu'
         self._models = {}
         self._optimizers = {}
         self._losses = {}
-        # Compatibility patching volatile / torch.no_grad() !
-        # Will remove it once 0.4 is released
-        self._use_no_grad = _torch_version.minor > 3 and _torch_version.major == 0
     
-    def cuda(self):
+    def cuda(self, device=0):
         """Sets the trainer to GPU mode. 
         
         If flagged, the data is cast to GPU before every iteration after being
         retrieved from the loader.
         """
-        self.use_gpu = True
+        self.device = 'cuda:{0}'.format(device)
 
-    def cpu(self):
+    def cpu(self, device=0):
         """Sets the trainer to CPU mode"""
-        self.use_gpu = False
+        self.device = 'cpu:{0}'.format(device)
 
     def train(self):
         """Sets the trainer and models to training mode"""
@@ -57,13 +54,11 @@ class BaseTrainer(object):
         """Returns the name(s)/key(s) of the validation loss(es)."""
         return self.loss_names(False)
 
-    def _cudata(self, data):
-        if self.use_gpu:
-            if any([isinstance(data, x) for x in [set, list, tuple]]):
-                data = type(data)(self._cudata(x) for x in data)
-            else:
-                data = data.cuda()
-        return data
+    def _to(self, data):
+        if any([isinstance(data, x) for x in [set, list, tuple]]):
+            return type(data)(self._to(x) for x in data)
+        else:
+            return data.to(self.device)
 
     def iteration(self, data):
         raise NotImplementedError
@@ -74,8 +69,9 @@ class BaseTrainer(object):
         Args:
             loader (iterable): The data loader.
         """
+        torch.set_grad_enabled(self.training)
         for data in barit(loader, start='Training' if self.training else 'Validation'):
-            data = self._cudata(data)
+            data = self._to(data)
             yield data, self.iteration(data)
         return
 

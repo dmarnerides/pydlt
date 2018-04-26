@@ -1,7 +1,6 @@
 import torch
 from torch.autograd import Variable
 from .basetrainer import BaseTrainer
-from ..util.misc import _get_scalar_value
 
 class VanillaTrainer(BaseTrainer):
     """Training of a network using a criterion/loss function.
@@ -40,25 +39,11 @@ class VanillaTrainer(BaseTrainer):
 
     def iteration(self, data):
 
+        v_pred = self._models['model'](data[0])
+        loss = self.criterion(v_pred, data[1])
         if self.training:
-            v_input = Variable(data[0])
-            v_output = Variable(data[1])
-            v_pred = self._models['model'](v_input)
-            loss = self.criterion(v_pred, v_output)
             self._optimizers['optimizer'].zero_grad()
             loss.backward()
             self._optimizers['optimizer'].step()
-        else:
-            if self._use_no_grad:
-                with torch.no_grad():
-                    v_input = Variable(data[0])
-                    v_output = Variable(data[1])
-                    v_pred = self._models['model'](v_input)
-                    loss = self.criterion(v_pred, v_output)
-            else:
-                v_input = Variable(data[0], volatile=True)
-                v_output = Variable(data[1], volatile=True)
-                v_pred = self._models['model'](v_input)
-                loss = self.criterion(v_pred, v_output)
         key = 'training_loss' if self.training else 'validation_loss'
-        return v_pred.data, {key: _get_scalar_value(loss.data)}
+        return v_pred, {key: loss.item()}

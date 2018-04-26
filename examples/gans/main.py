@@ -59,8 +59,8 @@ if opt.use_gpu:
     discriminator.cuda()
 
 # Optimizers
-g_optim = dlt.config.optimizer(generator, subset='generator')
-d_optim = dlt.config.optimizer(discriminator, subset='discriminator')
+g_optim, g_optim_chkp = dlt.config.optimizer(generator, subset='generator')
+d_optim, d_optim_chkp = dlt.config.optimizer(discriminator, subset='discriminator')
 
 # Trainer
 if opt.gan_type == 'wgan-gp':
@@ -95,5 +95,8 @@ for epoch in range(current_epoch, opt.max_epochs):
         log(losses['d_loss'])
     # Do some checkpointomg
     epoch_chkp(epoch + 1) # +1 because this epoch has finished
-    gen_chkp(generator, tag='epoch-{0}'.format(epoch))
-    disc_chkp(discriminator, tag='epoch-{0}'.format(epoch))
+    tag = 'epoch-{0}'.format(epoch)
+    gen_chkp(generator, tag=tag)
+    disc_chkp(discriminator, tag=tag)
+    g_optim_chkp(g_optim, tag=tag)
+    d_optim_chkp(d_optim, tag=tag)

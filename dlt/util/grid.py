@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from .misc import _determine_view, change_view, is_array, is_tensor, \
-                  is_variable, to_array, to_tensor, map_range
+                  to_array, to_tensor, map_range
 
 def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_value=0, scale_each=False):
     """Creates a single image grid from a set of images.
@@ -90,7 +90,7 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
                 padwr = maxw - imgw - padwl
                 images[i] = torch.nn.functional.pad(img, (padwl, padwr, padhl, padhr)).data
         images = torch.cat(images,0)
-    elif is_tensor(images) or is_variable(images) or is_array(images):
+    elif is_tensor(images) or is_array(images):
         should_convert_to_array = is_array(images)
         images = to_tensor(images)
         images = change_view(images, orig_view, 'torch')
@@ -102,8 +102,8 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
         else:
             images = images.unsqueeze(0).unsqueeze(0).view(-1,1,*images.size()[-2:])
     else:
-        raise TypeError('make_grid can only accept tuples, lists, tensors, '
-                         'variables and numpy arrays. Got {0}'.format(torch.typename(images)))
+        raise TypeError('make_grid can only accept tuples, lists, tensors'
+                         ' and numpy arrays. Got {0}'.format(torch.typename(images)))
 
     # Scale each
     if scale_each:

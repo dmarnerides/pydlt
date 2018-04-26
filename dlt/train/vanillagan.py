@@ -1,7 +1,6 @@
 import torch
 from torch.autograd import Variable
 from .ganbasetrainer import GANBaseTrainer
-from ..util.misc import _get_scalar_value
 
 class VanillaGANTrainer(GANBaseTrainer):
     """Generative Adversarial Networks trainer. 
@@ -13,8 +12,6 @@ class VanillaGANTrainer(GANBaseTrainer):
         d_optimizer (torch.optim.Optimizer): Discriminator Optimizer.
         d_iter (int, optional): Number of discriminator steps per generator
             step (default 1).
-        add_loss (callable, optional): Extra loss term to be added to GAN
-            objective (default None).
 
     Each iteration returns the mini-batch and a tuple containing:
 
@@ -23,7 +20,7 @@ class VanillaGANTrainer(GANBaseTrainer):
           `g_loss` dictionary (only if a generator step is performed):
             
             - `d_loss contains`: `d_loss`, `real_loss`, and `fake_loss`.
-            - `g_loss` contains: `g_loss` (and extra_loss if add_loss is used).
+            - `g_loss` contains: `g_loss`.
 
     Example:
         >>> trainer = dlt.train.VanillaGANTrainer(gen, disc, g_optim, d_optim)
@@ -36,90 +33,56 @@ class VanillaGANTrainer(GANBaseTrainer):
         This trainer uses BCEWithLogitsLoss, which means that the discriminator
         must NOT have a sigmoid at the end.
     """
-    def __init__(self, generator, discriminator, g_optimizer, d_optimizer, d_iter=1, add_loss=None):
-        
+    def __init__(self, generator, discriminator, g_optimizer, d_optimizer, d_iter=1):
         super(VanillaGANTrainer, self).__init__(generator, discriminator, g_optimizer, 
-                                                d_optimizer, d_iter, add_loss)
+                                                d_optimizer, d_iter)
         # Register losses
         self._losses['training'] = ['d_loss', 'fake_loss', 'real_loss']
         self._losses['validation'] = ['g_loss']
-        self.real_label = 1
-        self.fake_label = 0
         self.bce = torch.nn.BCEWithLogitsLoss()
-        self.add_loss = add_loss
-        if self.add_loss is not None:
-            self._losses['training'] += ['extra_loss']
 
     def d_step(self, g_input, real_input):
         batch_size = g_input.size(0)
-        for p in self._models['discriminator'].parameters():
-            p.requires_grad = True
-        self._models['discriminator'].zero_grad()
+        disc, gen = self._models['discriminator'], self._models['generator']
+        self._set_gradients('discriminator', True)
+        self._set_gradients('generator', False)
 
-        if self._use_no_grad:
-            with torch.no_grad():
-                t_pred = self._models['generator'](Variable(g_input)).data
-            prediction = Variable(t_pred)
-        else:
-            prediction = Variable(self._models['generator'](Variable(g_input, volatile=True)).data)
-        real_label = Variable(prediction.data.new(batch_size,1).fill_(self.real_label))
-        fake_label = Variable(prediction.data.new(batch_size,1).fill_(self.fake_label))
+        prediction = gen(g_input)
 
-        loss_fake = self.bce(self._models['discriminator'](prediction), fake_label)
-        loss_real = self.bce(self._models['discriminator'](Variable(real_input)), real_label)
+        real_label = torch.ones(batch_size, 1, device=prediction.device)
+        fake_label = torch.zeros(batch_size, 1, device=prediction.device)
+
+        loss_fake = self.bce(disc(prediction), fake_label)
+        loss_real = self.bce(disc(real_input), real_label)
 
         total_loss = loss_fake + loss_real
+        
+        disc.zero_grad()
         total_loss.backward()
         self._optimizers['discriminator'].step()
 
-        ret_losses = {'d_loss': _get_scalar_value(total_loss.data), 
-                      'real_loss': _get_scalar_value(loss_real.data), 
-                      'fake_loss': _get_scalar_value(loss_fake.data)}
+        ret_losses = {'d_loss': total_loss.item(), 
+                      'real_loss': loss_real.item(), 
+                      'fake_loss': loss_fake.item()}
         self.d_iter_counter += 1
-        return prediction.data, ret_losses
+        return prediction, ret_losses
 
 
     def g_step(self, g_input, real_input):
         batch_size = g_input.size(0)
-        for p in self._models['discriminator'].parameters():
-            p.requires_grad = False
-        if self.training:
-            self._models['generator'].zero_grad()
-            prediction = self._models['generator'](Variable(g_input))
-            # fake labels are real for generator cost
-            d_prediction = self._models['discriminator'](prediction)
-            labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
-            error = self.bce(d_prediction, labelv)
-            total_loss = error
-            if self.add_loss:
-                extra_loss = self.add_loss(prediction, Variable(real_input))
-                total_loss += extra_loss
-            total_loss.backward()
-            self._optimizers['generator'].step()
-        else:
-            if self._use_no_grad:
-                with torch.no_grad:
-                    prediction = self._models['generator'](Variable(g_input))
-                    # fake labels are real for generator cost
-                    d_prediction = self._models['discriminator'](prediction)
-                    labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
-                    error = self.bce(d_prediction, labelv)
-                    total_loss = error
-                    if self.add_loss:
-                        extra_loss = self.add_loss(prediction, Variable(real_input))
-                        total_loss += extra_loss
-            else:
-                prediction = self._models['generator'](Variable(g_input, volatile=True))
-                # fake labels are real for generator cost
-                d_prediction = self._models['discriminator'](prediction)
-                labelv = Variable(d_prediction.data.new(batch_size,1).fill_(self.real_label))
-                error = self.bce(d_prediction, labelv)
-                total_loss = error
-                if self.add_loss:
-                    extra_loss = self.add_loss(prediction, Variable(real_input))
-                    total_loss += extra_loss
+        disc, gen = self._models['discriminator'], self._models['generator']
+        self._set_gradients('discriminator', False)
+        self._set_gradients('generator', True)
 
-        ret_loss = {'g_loss': _get_scalar_value(error.data)}
-        if self.add_loss:
-            ret_loss['extra_loss'] = _get_scalar_value(extra_loss.data)
-        return prediction.data, ret_loss
+        prediction = gen(g_input)
+        # fake labels are real for generator cost (optimization trick from GAN paper)
+        d_prediction = disc(prediction)
+        real_label = torch.ones(batch_size, 1, device=d_prediction.device)
+        loss = self.bce(d_prediction, real_label)
+        
+        if self.training:
+            gen.zero_grad()
+            loss.backward()
+            self._optimizers['generator'].step()
+
+        return prediction.data, {'g_loss': loss.item()}

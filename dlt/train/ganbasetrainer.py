@@ -9,12 +9,10 @@ class GANBaseTrainer(BaseTrainer):
         g_optimizer (torch.optim.Optimizer): Generator Optimizer.
         d_optimizer (torch.optim.Optimizer): Discriminator Optimizer.
         d_iter (int): Number of discriminator steps per generator step.
-        add_loss (callable, optional): Extra loss term to be added to GAN
-            objective.
 
     Inherits from :class:`dlt.train.BaseTrainer`
     """
-    def __init__(self, generator, discriminator, g_optimizer, d_optimizer, d_iter, add_loss=None):
+    def __init__(self, generator, discriminator, g_optimizer, d_optimizer, d_iter):
         super(GANBaseTrainer, self).__init__()
         # Register models
         self._models['generator'] = generator
@@ -24,7 +22,6 @@ class GANBaseTrainer(BaseTrainer):
 
         self.d_iter = d_iter
         self.d_iter_counter = 0
-        self.add_loss = add_loss
 
     def iteration(self, data):
         losses = {}
@@ -44,3 +41,7 @@ class GANBaseTrainer(BaseTrainer):
 
     def g_step(self, g_input, real_input):
         raise NotImplementedError
+
+    def _set_gradients(self, model, value):
+        for p in self._models[model].parameters():
+            p.requires_grad_(value)

@@ -6,8 +6,7 @@ def selu_init(model):
         if hasattr(m,'pretrained') and m.pretrained:
             continue
         if any([isinstance(m, x) for x in [nn.Conv2d, nn.ConvTranspose2d, nn.Linear]]):
-            fan_in = nn.init._calculate_correct_fan(m.weight.data, 'fan_in')
-            nn.init.normal(m.weight.data, std=1.0/math.sqrt(fan_in))
+            nn.init.kaiming_normal_(m.weight.data, 1)
 
 class Generator(nn.Module):
     def __init__(self, num_hidden, z_dim, num_chan, num_pix):

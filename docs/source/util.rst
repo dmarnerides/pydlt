@@ -80,10 +80,6 @@ Tensor/Array Operations
 
 .. autofunction:: replicate
 
-:hidden:`is_variable`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: is_variable
 
 :hidden:`is_tensor`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
