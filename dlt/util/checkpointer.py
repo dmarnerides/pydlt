@@ -24,7 +24,7 @@ class Checkpointer(object):
         >>> b = a_chkp.load()
         {'data': 5}
 
-    It automatically saves and loads the `state_dict` of `nn.Module` objects::
+    It automatically saves and loads the `state_dict` of objects::
 
         >>> net = nn.Sequential(nn.Linear(1,1), nn.Sigmoid())
         >>> net_chkp = dlt.util.Checkpointer('net_state_dict')
@@ -42,6 +42,10 @@ class Checkpointer(object):
         0.8495
         [torch.FloatTensor of size 1]
         )])
+
+    Warning:
+        If a model is wrapped in `nn.DataParallel` then the wrapped model.module (state_dict)
+        is saved.
 
     """
 
@@ -81,6 +85,8 @@ class Checkpointer(object):
             return state
 
     def _get_state(self, obj):
+        if isinstance(obj, torch.nn.DataParallel):
+            obj = obj.module
         if hasattr(obj, 'state_dict'):
             return obj.state_dict()
         else:
@@ -98,6 +104,7 @@ class Checkpointer(object):
             tag (str, optional): Tag to add to saved filename (default None).
             args: Arguments to pass to `torch.save`.
             kwargs: Keyword arguments to pass to `torch.save`.
+
         """
         self.counter += 1
         old_filename = self.filename
