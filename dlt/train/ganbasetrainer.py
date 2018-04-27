@@ -24,16 +24,13 @@ class GANBaseTrainer(BaseTrainer):
         self.d_iter_counter = 0
 
     def iteration(self, data):
-        losses = {}
         if self.training:
-            pred, d_loss = self.d_step(data[0], data[1])
-            losses['d_loss'] = d_loss
+            pred, losses = self.d_step(data[0], data[1])
             if self.d_iter_counter % self.d_iter == 0:
                 _, g_loss = self.g_step(data[0], data[1])
-                losses['g_loss'] = g_loss
+                losses.update(g_loss)
         else:
-            pred, g_loss = self.g_step(data[0], data[1])
-            losses['g_loss'] = g_loss
+            pred, losses = self.g_step(data[0], data[1])
         return pred, losses
 
     def d_step(self, g_input, real_input):
