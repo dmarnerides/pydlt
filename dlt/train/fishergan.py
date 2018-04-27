@@ -36,7 +36,7 @@ class FisherGANTrainer(GANBaseTrainer):
                                                 d_optimizer, d_iter)
         # Register losses
         self._losses['training'] = ['ipm_enum', 'ipm_denom', 'ipm_ratio', 'd_loss', 'constraint', 
-                                    'epf', 'eqf', 'epf2', 'eqf2', 'lagrange']
+                                    'epf', 'eqf', 'epf2', 'eqf2', 'lagrange', 'g_loss']
         self._losses['validation'] = ['g_loss']
         self.rho = rho
         self.alpha = torch.zeros(1, requires_grad=True)

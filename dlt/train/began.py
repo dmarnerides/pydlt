@@ -37,7 +37,7 @@ class BEGANTrainer(GANBaseTrainer):
     def __init__(self, generator, discriminator, g_optimizer, d_optimizer, lambda_k, gamma, d_iter=1):
         super(BEGANTrainer, self).__init__(generator, discriminator, g_optimizer, d_optimizer, d_iter)
         # Register losses
-        self._losses['training'] = ['d_loss', 'real_loss', 'fake_loss', 'k', 'balance', 'measure']
+        self._losses['training'] = ['d_loss', 'real_loss', 'fake_loss', 'k', 'balance', 'measure', 'g_loss']
         self._losses['validation'] = ['g_loss']
         self.k = 0.0
         self.lambda_k = lambda_k

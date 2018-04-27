@@ -37,7 +37,7 @@ class VanillaGANTrainer(GANBaseTrainer):
         super(VanillaGANTrainer, self).__init__(generator, discriminator, g_optimizer, 
                                                 d_optimizer, d_iter)
         # Register losses
-        self._losses['training'] = ['d_loss', 'fake_loss', 'real_loss']
+        self._losses['training'] = ['d_loss', 'fake_loss', 'real_loss', 'g_loss']
         self._losses['validation'] = ['g_loss']
         self.bce = torch.nn.BCEWithLogitsLoss()
 

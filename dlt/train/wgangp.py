@@ -35,7 +35,7 @@ class WGANGPTrainer(GANBaseTrainer):
         super(WGANGPTrainer, self).__init__(generator, discriminator, g_optimizer, 
                                                 d_optimizer, d_iter)
         # Register losses
-        self._losses['training'] = ['w_loss', 'd_loss', 'gp']
+        self._losses['training'] = ['w_loss', 'd_loss', 'gp', 'g_loss']
         self._losses['validation'] = ['g_loss']
         self.lambda_gp = lambda_gp
                 
