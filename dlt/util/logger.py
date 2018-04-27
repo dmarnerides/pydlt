@@ -37,12 +37,17 @@ class Logger(object):
         """Same as :meth:`log`"""
         self.log(values)
 
+    def _create_dict(self, values):
+        ret = {key: '' for key in self.fields}
+        ret.update({key: val.item() if is_tensor(val) else val
+                    for key, val in values.items()})
+        return ret
+
     def log(self, values):
         """Logs a row of values.
 
         Args:
             values (dict): Dictionary containing the names and values.
         """
-        self.logger.info('', extra={key: val.item() if is_tensor(val) else val 
-                                    for key, val in values.items()})
+        self.logger.info('', extra=self._create_dict(values))
         
