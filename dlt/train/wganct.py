@@ -33,9 +33,10 @@ class WGANCTTrainer(GANBaseTrainer):
 
     Warning:
 
-        The discriminator needs to have a member function `get_get_ct_results`
-        which returns the second to last output of the discriminator along with
-        the last element.
+        The discriminator forward function needs to be able to accept an optional
+        bool argument `correction_term`. When set to true, the forward function
+        must add dropout noise to the model and return a tuple containing the 
+        second to last output of the discriminator along with the final output.
 
 
     Example:
@@ -112,8 +113,8 @@ class WGANCTTrainer(GANBaseTrainer):
         return x.pow(2).view(x.size(0), -1).sum(-1).add(1e-8).sqrt()
 
     def get_ct(self, real_input):
-        dx_dash_n2last, dx_dash = self._models['discriminator'].get_ct_results(real_input)
-        dx_dashdash_n2last, dx_dashdash = self._models['discriminator'].get_ct_results(real_input)
+        dx_dash_n2last, dx_dash = self._models['discriminator'](real_input, correction_term=True)
+        dx_dashdash_n2last, dx_dashdash = self._models['discriminator'](real_input, correction_term=True)
         res = self.l2_norm(dx_dash - dx_dashdash) + 0.1 \
               * self.l2_norm(dx_dash_n2last - dx_dashdash_n2last) \
               - self.m_ct
