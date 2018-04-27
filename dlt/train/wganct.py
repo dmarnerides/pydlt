@@ -29,7 +29,7 @@ class WGANCTTrainer(GANBaseTrainer):
           `g_loss` dictionary (only if a generator step is performed):
             
             - `d_loss contains`: `d_loss`, `w_loss`, `gp` and `ct`.
-            - `g_loss` contains: `g_loss` (and extra_loss if add_loss is used).
+            - `g_loss` contains: `g_loss`.
 
     Warning:
 
@@ -46,7 +46,7 @@ class WGANCTTrainer(GANBaseTrainer):
         >>> for batch, (prediction, loss) in trainer(train_data_loader):
         >>>     print(loss['d_loss']['w_loss'])
     """
-    def __init__(self, generator, discriminator, g_optimizer, d_optimizer, lambda_gp, m_ct, lambda_ct, d_iter=1, add_loss=None):
+    def __init__(self, generator, discriminator, g_optimizer, d_optimizer, lambda_gp, m_ct, lambda_ct, d_iter=1):
         super(WGANCTTrainer, self).__init__(generator, discriminator, g_optimizer, 
                                                 d_optimizer, d_iter)
         # Register losses
