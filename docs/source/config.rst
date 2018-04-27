@@ -74,15 +74,6 @@ Optimization
 
 .. autofunction:: scheduler
 
-:hidden:`epoch_checkpointer`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: epoch_checkpointer
-
-:hidden:`lr_checkpointer`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: lr_checkpointer
 
 Training
 --------------------------
