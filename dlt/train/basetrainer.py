@@ -9,7 +9,7 @@ class BaseTrainer(object):
         self._models = {}
         self._optimizers = {}
         self._losses = {}
-        self.epoch = 1
+        self.epoch = 0
     
     def cuda(self, device=0):
         """Sets the trainer to GPU mode. 
@@ -70,12 +70,16 @@ class BaseTrainer(object):
         Args:
             loader (iterable): The data loader.
         """
+        
+        if self.training:
+            self.epoch += 1
+        
         torch.set_grad_enabled(self.training)
+
         for data in barit(loader, start='Training' if self.training else 'Validation'):
             data = self._to(data)
             yield data, self.iteration(data)
-        if self.training:
-            self.epoch += 1
+        
         return
 
     __call__ = iterate
@@ -92,7 +96,8 @@ class BaseTrainer(object):
         It contains an entry for every variable in self.__dict__ which
         is not the one of the models or optimizers.
         """
-        return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
+        return {key: value for key, value in self.__dict__.items() 
+                if key not in ['_optimizers', '_losses', '_models']}
 
     def load_state_dict(self, state_dict):
         """Loads the trainers state.
