@@ -1,11 +1,29 @@
+import time
 import warnings
+import matplotlib
 import matplotlib.pyplot as plt
 from ..util import to_array, change_view, make_grid
 
 ## https://stackoverflow.com/questions/22873410/how-do-i-fix-the-deprecation-warning-that-comes-with-pylab-pause
 warnings.filterwarnings("ignore", ".*GUI is implemented.*")
 
-def imshow(img, view='torch', figure=None, pause=0, title=None, *args, **kwargs):
+def mypause(interval):
+    backend = matplotlib.rcParams['backend']
+    if backend in matplotlib.rcsetup.interactive_bk:
+        figManager = matplotlib._pylab_helpers.Gcf.get_active()
+        if figManager is not None:
+            canvas = figManager.canvas
+            if canvas.figure.stale:
+                canvas.draw()
+            canvas.start_event_loop(interval)
+            return
+
+    # No on-screen figure is active, so sleep() is all we need.
+    time.sleep(interval)
+
+_pause_min = 1e-2
+
+def imshow(img, view='torch', figure=None, pause=0, title=None, interactive=False, *args, **kwargs):
     """Displays a Tensor or Array image to screen.
 
     Args:
@@ -14,15 +32,17 @@ def imshow(img, view='torch', figure=None, pause=0, title=None, *args, **kwargs)
             :func:`dlt.util.change_view` (default 'torch').
         figure (int, optional): Use selected figure (default None).
         pause (float, optional): Number of seconds to pause execution for
-            displaying. If 0 execution is stopped indefinitely. Useful for
-            displaying changing images in a video-like fashion (default 0).
+            displaying when interactive is True. If a value less than 1e-2 is
+            given then it defaults to 1e-2 (default 1e-2).
         title (str, optional): Title for figure (default None).
+        interactive (bool, optional): If the image will be updated; uses
+            plt.ion() (default False).
         *args (optional): Extra arguments to be passed to plt.imshow().
         **kwargs (optional): Extra keyword arguments to be passed to plt.imshow().
     Example:
         >>> for video_1_frame, video_2_frame in two_videos_frames:
-        >>>     dlt.viz.imshow(video_1_frame, view='cv', figure=1, pause=0.2, title='Video 1')
-        >>>     dlt.viz.imshow(video_2_frame, view='cv', figure=2, pause=0.2, title='Video 2')
+        >>>     dlt.viz.imshow(video_1_frame, view='cv', figure=1, interactive=True, title='Video 1')
+        >>>     dlt.viz.imshow(video_2_frame, view='cv', figure=2, interactive=True, title='Video 2')
 
     """
     if figure is None:
@@ -35,9 +55,11 @@ def imshow(img, view='torch', figure=None, pause=0, title=None, *args, **kwargs)
     if title is not None:
         f = plt.gcf()
         f.canvas.set_window_title(title)
-    if pause > 0:
+    
+    if interactive:
         plt.ion()
         plt.clf()
+        pause = max(_pause_min, pause)
     else:
         plt.ioff()
         
@@ -50,10 +72,15 @@ def imshow(img, view='torch', figure=None, pause=0, title=None, *args, **kwargs)
         raise ValueError('Invalid number of channels ({0}). '.format(img.shape[-1])
                          + 'Perhaps you used the wrong view?')
     img = img.squeeze()
+
     plt.imshow(img, cmap='gray' if img.ndim == 2 else None, *args, **kwargs)
+
     if pause > 0:
-        plt.pause(pause)
-    else:
-        plt.show()
+        mypause(pause)
+    
+    if figure not in imshow.displayed or not interactive:
+        imshow.displayed.add(figure)
+        plt.show(block=not interactive)
 
 imshow.my_figure = None
+imshow.displayed = set()
