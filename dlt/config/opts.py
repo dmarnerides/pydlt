@@ -233,6 +233,7 @@ parse.param_dict = {
                dict(flags=['--timestamp_trainer_chkp'], type=str2bool, default=False, help='Add timestamp to trainer checkpoints'),
                dict(flags=['--count_trainer_chkp'], type=str2bool, default=True, help='Add count to trainer checkpoints') ],
     'samples': [dict(flags=['--save_samples'], type=str2bool, default=False, help='Save samples'),
+                dict(flags=['--display_samples'], type=str2bool, default=False, help='Display samples'),
                 dict(flags=['--sample_freq'], type=int, default=1, help='Iterations per sample')]
 }
 

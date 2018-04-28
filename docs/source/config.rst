@@ -91,7 +91,7 @@ Training
 Misc
 --------------------------
 
-:hidden:`save_samples`
+:hidden:`sample_images`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: save_samples
+.. autofunction:: sample_images
