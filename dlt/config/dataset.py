@@ -14,11 +14,12 @@ def _custom_get_item(self, index):
         target = self.target_transform(target)
     return img, target
 
-def torchvision_dataset(transform=None, train=True, subset=None):
+def torchvision_dataset(transform=None, target_transform=None, train=True, subset=None):
     """Creates a dataset from torchvision, configured using Command Line Arguments.
 
     Args:
         transform (callable, optional): A function that transforms an image (default None).
+        target_transform (callable, optional): A function that transforms a label (default None).
         train (bool, optional): Training set or validation - if applicable (default True).
         subset (string, optional): Specifies the subset of the relevant
             categories, if any of them was split (default, None).
@@ -48,7 +49,8 @@ def torchvision_dataset(transform=None, train=True, subset=None):
     if opts.torchvision_dataset == 'mnist':
         from torchvision.datasets import MNIST
         MNIST.__getitem__ = _custom_get_item
-        ret_dataset = MNIST(opts.data, train=train, download=True, transform=transform)
+        ret_dataset = MNIST(opts.data, train=train, download=True, transform=transform,
+                            target_transform=target_transform)
         # Add channel dimension and make numpy for consistency
         if train:
             ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3).numpy()
@@ -59,7 +61,8 @@ def torchvision_dataset(transform=None, train=True, subset=None):
     elif opts.torchvision_dataset == 'fashionmnist':
         from torchvision.datasets import FashionMNIST
         FashionMNIST.__getitem__ = _custom_get_item
-        ret_dataset = FashionMNIST(opts.data, train=train, download=True, transform=transform)
+        ret_dataset = FashionMNIST(opts.data, train=train, download=True, transform=transform,
+                                   target_transform=target_transform)
         if train:
             ret_dataset.train_data = ret_dataset.train_data.unsqueeze(3).numpy()
             ret_dataset.train_labels = ret_dataset.train_labels.numpy()
@@ -69,11 +72,13 @@ def torchvision_dataset(transform=None, train=True, subset=None):
     elif opts.torchvision_dataset == 'cifar10':
         from torchvision.datasets import CIFAR10
         CIFAR10.__getitem__ = _custom_get_item
-        ret_dataset = CIFAR10(opts.data, train=train, download=True, transform=transform)
+        ret_dataset = CIFAR10(opts.data, train=train, download=True, transform=transform,
+                              target_transform=target_transform)
     elif opts.torchvision_dataset == 'cifar100':
         from torchvision.datasets import CIFAR100
         CIFAR100.__getitem__ = _custom_get_item
-        ret_dataset = CIFAR100(opts.data, train=train, download=True, transform=transform)
+        ret_dataset = CIFAR100(opts.data, train=train, download=True, transform=transform,
+                               target_transform=target_transform)
     return ret_dataset
 
 def directory_dataset(load_fn=imread, preprocess=None, subset=None):
