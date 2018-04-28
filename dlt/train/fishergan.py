@@ -60,7 +60,7 @@ class FisherGANTrainer(GANBaseTrainer):
         d_loss.backward()
         self._optimizers['discriminator'].step()
         self.alpha = self.alpha + self.rho * self.alpha.grad
-        self.alpha.detatch().requires_grad_(True)
+        self.alpha.detach().requires_grad_(True)
 
         # IPM
         ipm_enum = epf.item() - eqf.item()
@@ -76,7 +76,7 @@ class FisherGANTrainer(GANBaseTrainer):
                       'eqf2': eqf2.item(),
                       'lagrange': self.alpha.item()}
         self.d_iter_counter += 1
-        return prediction.data, ret_losses
+        return prediction, ret_losses
 
     def g_step(self, g_input, real_input):
         disc, gen = self._models['discriminator'], self._models['generator']
@@ -91,4 +91,4 @@ class FisherGANTrainer(GANBaseTrainer):
             loss.backward()
             self._optimizers['generator'].step()
 
-        return prediction.data, {'g_loss': loss.item()}
+        return prediction, {'g_loss': loss.item()}

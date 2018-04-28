@@ -69,7 +69,7 @@ class BEGANTrainer(GANBaseTrainer):
                       'fake_loss': fake_loss.item(),
                       'k': self.k, 'measure': measure, 'balance': balance}
         self.d_iter_counter += 1
-        return prediction.data, ret_losses
+        return prediction, ret_losses
 
     def g_step(self, g_input, real_input):
         disc, gen = self._models['discriminator'], self._models['generator']
@@ -84,4 +84,4 @@ class BEGANTrainer(GANBaseTrainer):
             loss.backward()
             self._optimizers['generator'].step()
 
-        return prediction.data, {'g_loss': loss.item()}
+        return prediction, {'g_loss': loss.item()}

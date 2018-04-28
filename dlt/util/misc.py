@@ -2,7 +2,7 @@ import math
 import torch
 from torch import nn
 import numpy as np
-
+import pandas as pd
 
 def count_parameters(net):
     """Counts the parameters of a given PyTorch model."""
@@ -245,7 +245,7 @@ def map_range(x, low=0, high=1):
     else:
         xmax, xmin = x.max(), x.min()
         if xmax - xmin == 0:
-            return x.data.clone().fill_(0)
+            return torch.zeros_like(x)
         return x.add(-xmin).div_(xmax-xmin).mul_(high-low).add_(low).clamp_(low, high)
 
 # This was added to torch in v0.3. Keeping it here too.
@@ -258,8 +258,8 @@ def is_cuda(x):
     return torch.is_tensor(x) and x.is_cuda
 
 def is_array(x):
-    """Checks if input type contains 'array' or 'series' in its typename."""
-    return torch.typename(x).find('array') >= 0 or torch.typename(x).find('series') >= 0 
+    """Checks if input is a numpy array or a pandas Series."""
+    return isinstance(x, np.ndarray) or isinstance(x, pd.Series)
 
 ## Returns a numpy array version of x
 def to_array(x):
@@ -272,7 +272,7 @@ def to_array(x):
     to CPU.
     """
     if is_cuda(x):
-        x = x.data.cpu()
+        x = x.cpu()
     if is_tensor(x):
         return x.numpy()
     else:
@@ -288,7 +288,7 @@ def to_tensor(x):
     Automatically casts GPU Tensors to CPU.
     """
     if is_cuda(x):
-        return x.data.cpu()
+        return x.cpu()
     if is_array(x):
         return torch.from_numpy(x)
     else:

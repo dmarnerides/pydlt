@@ -49,7 +49,7 @@ class WGANGPTrainer(GANBaseTrainer):
         error_fake = disc(prediction).mean()
         error_real = disc(Variable(real_input)).mean()
 
-        gp = self.get_gp(prediction.data, real_input)
+        gp = self.get_gp(prediction, real_input)
         w_loss = error_fake - error_real
         total_loss = w_loss + gp
 
@@ -59,7 +59,7 @@ class WGANGPTrainer(GANBaseTrainer):
 
         ret_losses = {'w_loss': w_loss.item(), 'gp': gp.item(), 'd_loss': total_loss.item()}
         self.d_iter_counter += 1
-        return prediction.data, ret_losses
+        return prediction, ret_losses
 
     def g_step(self, g_input, real_input):
         disc, gen = self._models['discriminator'], self._models['generator']
@@ -74,7 +74,7 @@ class WGANGPTrainer(GANBaseTrainer):
             loss.backward()
             self._optimizers['generator'].step()
 
-        return prediction.data, {'g_loss': loss.item()}
+        return prediction, {'g_loss': loss.item()}
 
     def get_gp(self, fake_input, real_input):
         dimensions = [real_input.size(0)] + [1] * (real_input.ndimension() - 1)

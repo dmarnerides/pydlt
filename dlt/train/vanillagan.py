@@ -85,4 +85,4 @@ class VanillaGANTrainer(GANBaseTrainer):
             loss.backward()
             self._optimizers['generator'].step()
 
-        return prediction.data, {'g_loss': loss.item()}
+        return prediction, {'g_loss': loss.item()}

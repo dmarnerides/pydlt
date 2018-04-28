@@ -8,7 +8,6 @@ from ..util import torch2cv, map_range, make_grid
 
 def _get_tensor(x):
     x = x[0] if torch.typename(x) in ['tuple', 'list'] else x
-    x = x.data if hasattr(x,'data') else x
     return x
 
 def save_image(img, title):

@@ -88,7 +88,7 @@ def make_grid(images, view='torch', color=True, size=None, inter_pad=None, fill_
                 padhr = maxh - imgh - padhl
                 padwl = int((maxw - imgw)/2)
                 padwr = maxw - imgw - padwl
-                images[i] = torch.nn.functional.pad(img, (padwl, padwr, padhl, padhr)).data
+                images[i] = torch.nn.functional.pad(img, (padwl, padwr, padhl, padhr))
         images = torch.cat(images,0)
     elif is_tensor(images) or is_array(images):
         should_convert_to_array = is_array(images)
