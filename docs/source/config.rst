@@ -69,6 +69,11 @@ Optimization
 
 .. autofunction:: optimizer
 
+:hidden:`optimizer_checkpointer`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: optimizer_checkpointer
+
 :hidden:`scheduler`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

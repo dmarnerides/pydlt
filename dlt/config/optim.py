@@ -4,7 +4,7 @@ from ..util import Checkpointer
 from .opts import fetch_opts, parse
 
 def optimizer(model, subset=None):
-    """Returns the optimizer for the given model, along with an optimizer checkpointer.
+    """Returns the optimizer for the given model.
     
     Args:
         model (nn.Module): The network for the optimizer.
@@ -14,9 +14,7 @@ def optimizer(model, subset=None):
     Relevant Command Line Arguments:
 
         - **optimizer**: `--optimizer`, `--lr`, `--momentum`,
-            `--dampening`, `--beta1`, `--beta2`, `--weight_decay`,
-            `--overwrite_optimizer_chkp`, `--timestamp_optimizer_chkp`,
-            `--count_optimizer_chkp`.
+            `--dampening`, `--beta1`, `--beta2`, `--weight_decay`.
 
     Note:
         Settings are automatically acquired from a call to :func:`dlt.config.parse`
@@ -52,13 +50,38 @@ def optimizer(model, subset=None):
             alpha=opts.alpha, eps=opts.optim_eps, weight_decay=opts.weight_decay,
             momentum=opts.momentum, centered=opts.centered)
 
+    return ret_optimizer
+
+def optimizer_checkpointer(optimizer, subset=None):
+    """Returns the optimizer checkpointer. Configurable using command line arguments.
+    
+    The function also loads any previous checkpoints if present.
+
+    Args:
+        optimizer (torch.optim.Optimizer): The optimizer.
+        subset (string, optional): Specifies the subset of the relevant
+            categories, if any of them was split (default, None).
+
+    Relevant Command Line Arguments:
+
+        - **general**: `--experiment_name`, `--save_path`.
+        - **model**: `--overwrite_optimizer_chkp`, `--timestamp_optimizer_chkp`,
+            `--count_optimizer_chkp`.
+
+    Note:
+        Settings are automatically acquired from a call to :func:`dlt.config.parse`
+        from the built-in ones. If :func:`dlt.config.parse` was not called in the 
+        main script, this function will call it.
+    """
+
+    opts = fetch_opts(['general', 'optimizer'], subset)
     name = subset['optimizer'] if isinstance(subset, dict) else subset
     optim_chkp = Checkpointer('{0}_{1}optimizer'.format(opts.experiment_name, '' if name is None else name + '_'),
                                   directory=opts.save_path, overwrite=opts.overwrite_optimizer_chkp,
                                   timestamp=opts.timestamp_optimizer_chkp, add_count=opts.count_optimizer_chkp)
-    optim_chkp.load(ret_optimizer)
+    optim_chkp.load(optimizer)
+    return optim_chkp
 
-    return ret_optimizer, optim_chkp
 
 def scheduler(optimizer, subset=None):
     """Returns a scheduler callable closure which accepts one argument.
