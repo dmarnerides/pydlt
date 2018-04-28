@@ -1,7 +1,7 @@
 from .barit import barit
 from .checkpointer import Checkpointer
 from .dispatch import dispatch
-from .func import compose, parametrize, applier
+from .func import parametrize, applier
 from .grid import make_grid
 from .layers import out_size, in_size, kernel_size, stride_size, padding_size, \
     dilation_size, find_layers
@@ -17,6 +17,7 @@ from . import paths
 from .sample import index_gauss, slice_gauss, index_uniform, slice_uniform
 from .slurm import slurm
 from .data import LoadedDataset, DirectoryDataset
+from .external import accuracy, compose
 
 __all__ = [
     'barit', 'Checkpointer', 'dispatch', 'compose', 'parametrize', 'applier', 'make_grid',
@@ -28,5 +29,5 @@ __all__ = [
     'channel_flip', 'rgb2bgr', 'bgr2rgb', 'change_view', 'cv2torch', 'torch2cv', 'cv2plt',
     'plt2cv', 'plt2torch', 'torch2plt', 'replicate', 'paths', 'index_gauss', 'slice_gauss',
     'index_uniform', 'slice_uniform', 'slurm', '_determine_view', 'count_parameters',
-    'LoadedDataset', 'DirectoryDataset'
+    'LoadedDataset', 'DirectoryDataset', 'accuracy'
 ]

@@ -61,6 +61,10 @@ Quality of Life
 
 .. autofunction:: count_parameters
 
+:hidden:`accuracy`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autofunction:: accuracy
 
 Tensor/Array Operations
 ------------------------

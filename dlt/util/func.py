@@ -1,30 +1,3 @@
-# From torchnet
-def compose(transforms):
-    """Composes list of transforms (each accept and return one item).
-       
-       Shamelessly copied from PyTorchNet_
-
-       .. _PyTorchNet: https://github.com/pytorch/tnt
-
-       Args:
-            transforms (list):  List of callables, each accepts 
-                and returns one item.
-
-       Returns:
-            callable: The composed transforms.
-
-    """
-    assert isinstance(transforms, list)
-    for transform in transforms:
-        assert callable(transform), "list of functions expected"
-
-    def composition(obj):
-        "Composite function"
-        for transform in transforms:
-            obj = transform(obj)
-        return obj
-    return composition
-
 # Useful for composition of functions that are parametrized
 def parametrize(func, *args, **kwargs):
     """Parametrizes a transformation function to accept only one item.
