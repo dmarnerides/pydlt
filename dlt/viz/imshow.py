@@ -7,6 +7,7 @@ from ..util import to_array, change_view, make_grid
 ## https://stackoverflow.com/questions/22873410/how-do-i-fix-the-deprecation-warning-that-comes-with-pylab-pause
 warnings.filterwarnings("ignore", ".*GUI is implemented.*")
 
+## https://stackoverflow.com/questions/45729092/make-interactive-matplotlib-window-not-pop-to-front-on-each-update-windows-7
 def mypause(interval):
     backend = matplotlib.rcParams['backend']
     if backend in matplotlib.rcsetup.interactive_bk:
@@ -81,6 +82,8 @@ def imshow(img, view='torch', figure=None, pause=0, title=None, interactive=Fals
     if figure not in imshow.displayed or not interactive:
         imshow.displayed.add(figure)
         plt.show(block=not interactive)
+    
+    return figure
 
 imshow.my_figure = None
 imshow.displayed = set()
