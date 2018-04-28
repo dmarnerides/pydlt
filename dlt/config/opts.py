@@ -95,11 +95,11 @@ def add_extras(extras):
     elif isinstance(extras, list):
         parse.param_dict['extras'] = extras
 
-def parse(verbose=True):
+def parse(verbose=False):
     """Parses Command Line Arguments using the built-in settings (and any added extra).
 
     Args:
-        verbose (bool, optional): Print the parsed settings (default True).
+        verbose (bool, optional): Print the parsed settings (default False).
 
     Comes with built-in commonly used settings. To add extra settings use
     :func:`add_extras`.
