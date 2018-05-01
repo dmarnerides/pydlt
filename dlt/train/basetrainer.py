@@ -59,7 +59,7 @@ class BaseTrainer(object):
         if any([isinstance(data, x) for x in [set, list, tuple]]):
             return type(data)(self._to(x) for x in data)
         else:
-            return data.to(self.device)
+            return data.detach().to(self.device)
 
     def iteration(self, data):
         raise NotImplementedError
