@@ -24,8 +24,8 @@ def sample_images(samples, tag='', view='torch', ext='.png', color=True,
         size (list or tuple, optional): Grid dimensions, rows x columns. (default None).
         inter_pad (int, optional): Padding separating the images (default None).
         fill_value (int, optional): Fill value for inter-padding (default 0).
-        preprocess (callable, optional): Pre processing to apply to each image 
-            sample (default None).
+        preprocess (callable, optional): Pre processing to apply the image 
+            samples array (default None).
         subset (string, optional): Specifies the subset of the relevant
             categories, if any of them was split (default, None).
 
@@ -43,14 +43,14 @@ def sample_images(samples, tag='', view='torch', ext='.png', color=True,
     def get_sample(x):
         if preprocess:
             x = preprocess(x)
-        return to_array(x)
+        return applier(to_array)(x)
     if (opts.save_samples or opts.display_samples) \
             and (sample_images.count % opts.sample_freq == 0):
         name = subset['samples'] + '_' if isinstance(subset, dict) else subset + '_' if subset is not None else ''
         tag = tag + '_' if tag != '' else tag
         imname = '{0}{1}{2:07d}{3}'.format(name, tag, sample_images.count + 1, ext)
         
-        grid = make_grid(applier(get_sample)(samples),
+        grid = make_grid(get_sample(samples),
                          view=view, color=color, size=size,
                          inter_pad=inter_pad, fill_value=fill_value)
         grid = change_view(grid, view, 'cv')
