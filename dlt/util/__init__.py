@@ -1,7 +1,7 @@
 from .barit import barit
 from .checkpointer import Checkpointer
 from .dispatch import dispatch
-from .func import parametrize, applier
+from .func import applier
 from .grid import make_grid
 from .layers import out_size, in_size, kernel_size, stride_size, padding_size, \
     dilation_size, find_layers
@@ -20,7 +20,7 @@ from .data import LoadedDataset, DirectoryDataset
 from .external import accuracy, compose
 
 __all__ = [
-    'barit', 'Checkpointer', 'dispatch', 'compose', 'parametrize', 'applier', 'make_grid',
+    'barit', 'Checkpointer', 'dispatch', 'compose', 'applier', 'make_grid',
     'out_size', 'in_size', 'kernel_size', 'stride_size', 'padding_size', 'dilation_size', 
     'find_layers', 'Logger', 'Averages', 'slide_window_', 're_stride', 'moving_avg', 
     'moving_var', 'sub_avg', 'sub_var', 'has_nan', 'has_inf', 'replace_specials_', 'replace_inf_',

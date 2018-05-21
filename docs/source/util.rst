@@ -14,10 +14,6 @@ Functionals
 
 .. autofunction:: compose
 
-:hidden:`parametrize`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autofunction:: parametrize
 
 :hidden:`applier`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

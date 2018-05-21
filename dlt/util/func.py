@@ -1,25 +1,3 @@
-# Useful for composition of functions that are parametrized
-def parametrize(func, *args, **kwargs):
-    """Parametrizes a transformation function to accept only one item.
-
-       Useful to use in conjuction with :func:`dlt.util.compose`
-       
-       Args:
-            func (function): Function to be parametrized.
-
-       Returns:
-            callable: The one input parametrized function.
-
-       Example:
-            >>> prm_resize = dlt.util.parametrize(cv2.resize, (256, 256))
-            >>> prm_resize(img) # This will now resize img to 256 x 256
-
-    """
-    def parametrized(obj):
-        "Parametrized function"
-        return func(obj, *args, **kwargs)
-    return parametrized
-
 
 def applier(f):
     """Returns a function that applies `f` to a collection of inputs (or just one).
