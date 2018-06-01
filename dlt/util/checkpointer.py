@@ -44,8 +44,9 @@ class Checkpointer(object):
         )])
 
     Warning:
-        If a model is wrapped in `nn.DataParallel` then the wrapped model.module (state_dict)
-        is saved.
+        If a model is wrapped in `nn.DataParallel` then the wrapped model.module
+        (state_dict) is saved. Thus applying `nn.DataParallel` must be done after
+        using `Checkpointer.load()`.
 
     """
 
