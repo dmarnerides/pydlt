@@ -22,7 +22,7 @@ def mypause(interval):
     # No on-screen figure is active, so sleep() is all we need.
     time.sleep(interval)
 
-_pause_min = 1e-2
+_pause_min = 5e-2
 
 def imshow(img, view='torch', figure=None, pause=0, title=None, interactive=False, *args, **kwargs):
     """Displays a Tensor or Array image to screen.
