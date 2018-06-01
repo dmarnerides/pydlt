@@ -91,7 +91,8 @@ Training
 Misc
 --------------------------
 
-:hidden:`sample_images`
+:hidden:`ImageSampler`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. autofunction:: sample_images
+.. autoclass:: ImageSampler
+    :members:
