@@ -70,7 +70,7 @@ class ImageSampler(object):
         self.count += 1
 
     def __call__(self, imgs, tag=''):
-        """Same as :meth:`log`"""
+        """Same as :meth:`sample`"""
         self.sample(imgs)
 
     def _display(self, img, tag=''):
