@@ -1,5 +1,6 @@
 import os
 import argparse
+from functools import partial
 from ..util.paths import process
 from ..util import str2bool
 
@@ -152,7 +153,8 @@ def parse(verbose=False):
                     **{key: val for key, val in p.items() 
                         if key not in ['flag', 'flags']})
     opt = parser.parse_args()
-    opt.save_path = os.path.join(opt.save_path, opt.experiment_name + '_save')
+    if experiment_name != '':
+        opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
     
     if verbose:
         print_opts(opt)
@@ -189,8 +191,8 @@ parse.torchvision_datasets = ['mnist', 'fashionmnist', 'cifar10', 'cifar100']
 parse.optimizers = ['adam', 'sgd', 'adadelta', 'adagrad', 'sparseadam', 'adamax', 'rmsprop']
 
 parse.param_dict = {
-    'general': [dict(flags=['--experiment_name'], default='experiment', help='Name of experiment'),
-                 dict(flags=['--save_path'], type=lambda x:process(x,True), default='.', help='Root directory for experiments'),
+    'general': [dict(flags=['--experiment_name'], default='', help='Name of experiment'),
+                 dict(flags=['--save_path'], type=partial(process, create=True), default='.', help='Root directory for experiments'),
                  dict(flags=['--seed'], type=int, default=None, help='Seed for random number generation.'),
                  dict(flags=['--max_epochs'], type=int, default=100000, help='Maximum number of epochs')],
     'dataset': [ dict(flags=['--data'], type=process, default='.', help='Data directory' ),

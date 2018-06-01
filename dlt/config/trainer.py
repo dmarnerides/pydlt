@@ -25,7 +25,8 @@ def trainer_checkpointer(trainer, subset=None):
 
     opts = fetch_opts(['general', 'trainer'], subset)
     name = subset['trainer'] if isinstance(subset, dict) else subset
-    trainer_chkp = Checkpointer('{0}_{1}trainer'.format(opts.experiment_name, '' if name is None else name + '_'),
+    exp_name = opts.experiment_name + '_' if opts.experiment_name != '' else ''
+    trainer_chkp = Checkpointer('{0}{1}trainer'.format(exp_name, '' if name is None else name + '_'),
                                   directory=opts.save_path, overwrite=opts.overwrite_trainer_chkp,
                                   timestamp=opts.timestamp_trainer_chkp, add_count=opts.count_trainer_chkp)
     trainer_chkp.load(trainer)

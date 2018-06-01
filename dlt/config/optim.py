@@ -76,7 +76,8 @@ def optimizer_checkpointer(optimizer, subset=None):
 
     opts = fetch_opts(['general', 'optimizer'], subset)
     name = subset['optimizer'] if isinstance(subset, dict) else subset
-    optim_chkp = Checkpointer('{0}_{1}optimizer'.format(opts.experiment_name, '' if name is None else name + '_'),
+    exp_name = opts.experiment_name + '_' if opts.experiment_name != '' else ''
+    optim_chkp = Checkpointer('{0}{1}optimizer'.format(exp_name, '' if name is None else name + '_'),
                                   directory=opts.save_path, overwrite=opts.overwrite_optimizer_chkp,
                                   timestamp=opts.timestamp_optimizer_chkp, add_count=opts.count_optimizer_chkp)
     optim_chkp.load(optimizer)
