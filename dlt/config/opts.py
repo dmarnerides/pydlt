@@ -153,7 +153,7 @@ def parse(verbose=False):
                     **{key: val for key, val in p.items() 
                         if key not in ['flag', 'flags']})
     opt = parser.parse_args()
-    if experiment_name != '':
+    if opt.experiment_name != '':
         opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
     
     if verbose:
@@ -234,8 +234,8 @@ parse.param_dict = {
     'trainer': [ dict(flags=['--overwrite_trainer_chkp'], type=str2bool, default=True, help='Overwrite trainer checkpoints'),
                dict(flags=['--timestamp_trainer_chkp'], type=str2bool, default=False, help='Add timestamp to trainer checkpoints'),
                dict(flags=['--count_trainer_chkp'], type=str2bool, default=True, help='Add count to trainer checkpoints') ],
-    'samples': [dict(flags=['--save_samples'], type=str2bool, default=False, help='Save samples'),
-                dict(flags=['--display_samples'], type=str2bool, default=False, help='Display samples'),
+    'samples': [dict(flags=['--save_samples'], type=str2bool, default=True, help='Save samples'),
+                dict(flags=['--display_samples'], type=str2bool, default=True, help='Display samples'),
                 dict(flags=['--sample_freq'], type=int, default=1, help='Iterations per sample')]
 }
 
