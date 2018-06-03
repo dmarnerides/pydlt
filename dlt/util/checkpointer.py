@@ -110,17 +110,15 @@ class Checkpointer(object):
         self.counter += 1
         old_filename = self.filename
         new_filename = self._make_name(tag)
-        if new_filename == old_filename:
-            if not self.overwrite:
-                print('WARNING: Overwriting file in non overwrite mode.')
-            torch.save(self._get_state(obj), new_filename, *args, **kwargs)
-            torch.save((self.counter,new_filename) , self.chkp)
-        else:
-            torch.save(self._get_state(obj), new_filename, *args, **kwargs)
-            torch.save((self.counter,new_filename) , self.chkp)
-            if self.overwrite and self.counter > 1:
+        if new_filename == old_filename and not self.overwrite:
+            print('WARNING: Overwriting file in non overwrite mode.')
+        elif self.overwrite:
+            try:
                 os.remove(old_filename)
-
+            except:
+                pass
+        torch.save(self._get_state(obj), new_filename, *args, **kwargs)
+        torch.save((self.counter,new_filename) , self.chkp)
 
     def load(self, obj=None, *args, **kwargs):
         """Loads a checkpoint from disk.
