@@ -3,4 +3,3 @@ from .model import model_checkpointer
 from .trainer import trainer_checkpointer
 from .optim import optimizer, scheduler, optimizer_checkpointer
 from .opts import print_opts, parse, add_extras, make_subsets
-from .imagesampler import ImageSampler

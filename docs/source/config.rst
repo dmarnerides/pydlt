@@ -87,12 +87,3 @@ Training
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. autofunction:: trainer_checkpointer
-
-Misc
---------------------------
-
-:hidden:`ImageSampler`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. autoclass:: ImageSampler
-    :members:

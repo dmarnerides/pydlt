@@ -18,6 +18,7 @@ from .sample import index_gauss, slice_gauss, index_uniform, slice_uniform
 from .slurm import slurm
 from .data import LoadedDataset, DirectoryDataset
 from .external import accuracy, compose
+from .imagesampler import ImageSampler
 
 __all__ = [
     'barit', 'Checkpointer', 'dispatch', 'compose', 'applier', 'make_grid',
@@ -29,5 +30,5 @@ __all__ = [
     'channel_flip', 'rgb2bgr', 'bgr2rgb', 'change_view', 'cv2torch', 'torch2cv', 'cv2plt',
     'plt2cv', 'plt2torch', 'torch2plt', 'replicate', 'paths', 'index_gauss', 'slice_gauss',
     'index_uniform', 'slice_uniform', 'slurm', '_determine_view', 'count_parameters',
-    'LoadedDataset', 'DirectoryDataset', 'accuracy'
+    'LoadedDataset', 'DirectoryDataset', 'accuracy', 'ImageSampler'
 ]

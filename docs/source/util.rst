@@ -35,6 +35,11 @@ Quality of Life
 .. autoclass:: Checkpointer
     :members:
 
+:hidden:`ImageSampler`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. autoclass:: ImageSampler
+    :members:
 
 :hidden:`Averages`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

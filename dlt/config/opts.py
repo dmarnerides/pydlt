@@ -234,9 +234,6 @@ parse.param_dict = {
     'trainer': [ dict(flags=['--overwrite_trainer_chkp'], type=str2bool, default=True, help='Overwrite trainer checkpoints'),
                dict(flags=['--timestamp_trainer_chkp'], type=str2bool, default=False, help='Add timestamp to trainer checkpoints'),
                dict(flags=['--count_trainer_chkp'], type=str2bool, default=True, help='Add count to trainer checkpoints') ],
-    'samples': [dict(flags=['--save_samples'], type=str2bool, default=True, help='Save samples'),
-                dict(flags=['--display_samples'], type=str2bool, default=True, help='Display samples'),
-                dict(flags=['--sample_freq'], type=int, default=1, help='Iterations per sample')]
 }
 
 parse.default_avail_params = {category: [param['flags'][0][2:] for param in params] 
