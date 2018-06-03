@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import cv2
+from ..util import rgb2bgr
 from ..util.paths import process
 
 # Accepts hwc - BGR float32 numpy array (cv style)
@@ -37,7 +38,7 @@ def write_pfm(filename, img, scale=1):
 # TODO: Improve multiple views support
 # TODO: Improve speed
 def load_pfm(filename):
-    """Reads a pfm image file from disk into a Numpy Array (OpenCV view).
+    """Loads a pfm image file from disk into a Numpy Array (OpenCV view).
 
     Supports HDR and LDR image formats.
     
@@ -53,6 +54,22 @@ def load_pfm(filename):
         img = np.reshape(img, shape)
         return np.flip(np.flip(img, 2), 0).copy()
 
+def load_dng(filename, **kwargs):
+    """Loads a dng image file from disk into a float32 Numpy Array (OpenCV view).
+
+    Requires rawpy.
+
+    Args:
+        filename (str): Name of pfm image file.
+        **kwargs: Extra keyword arguments to pass to `rawpy.postprocess()`.
+    """
+    import rawpy
+    filename = process(filename)
+    with rawpy.imread(filename) as raw:
+        default_kwargs = dict(gamma=(1,1), no_auto_bright=True, output_bps=16)
+        default_kwargs.update(kwargs)
+        img = raw.postprocess(**default_kwargs)
+    return rgb2bgr(img,-1).astype('float32')
 
 # Accepts hwc - BGR float32 numpy array (cv style)
 # TODO: Improve multiple views support
@@ -84,6 +101,8 @@ def imread(filename):
     ext = os.path.splitext(filename)[1]
     if ext.lower() == '.pfm':
         return load_pfm(filename)
+    elif ext.lower() == '.dng':
+        return load_dng(filename)
     else:
         loaded = cv2.imread(filename, flags=cv2.IMREAD_ANYDEPTH + cv2.IMREAD_COLOR)
         if loaded is None:
