@@ -190,7 +190,7 @@ def parse(verbose=False):
                 old_git_hash = f.read()
             if old_git_hash != git_hash:
                 hash_warn = 'Current git hash ({0}) does not match the one used to generate the save directory ({1})\n'
-                logging.getLogger('dlt').warning(hash_warn)
+                logging.getLogger('dlt').warning(hash_warn.format(git_hash, old_git_hash))
 
     # Create an event log file
     if opt.create_log:
