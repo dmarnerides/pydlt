@@ -9,7 +9,6 @@ class CustomFileHandler(logging.FileHandler):
             msg = self.format(record)
             stream = self.stream
             stream.write(msg)
-            self.flush()
         except Exception:
             self.handleError(record)
 
