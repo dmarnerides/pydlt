@@ -180,6 +180,11 @@ def parse(verbose=False):
         opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
     paths.make(opt.save_path)
 
+    # Create an event log file
+    if opt.create_log:
+        logfile = os.path.join(opt.save_path, opt.log_name)
+        DuplStdOut(logfile)
+
     # Manage git hashes and print message
     git_hash = get_git_hash()
     git_hash_file = os.path.join(opt.save_path, '.githash')
@@ -192,11 +197,6 @@ def parse(verbose=False):
             if old_git_hash != git_hash:
                 hash_warn = 'Current git hash ({0}) does not match the one used to generate the save directory ({1})\n'
                 logging.getLogger('dlt').warning(hash_warn.format(git_hash, old_git_hash))
-
-    # Create an event log file
-    if opt.create_log:
-        logfile = os.path.join(opt.save_path, opt.log_name)
-        DuplStdOut(logfile)
 
     # Print all arguments 
     if verbose:
