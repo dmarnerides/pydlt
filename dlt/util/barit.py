@@ -55,7 +55,6 @@ def barit(iterable, start=None, end=None, time_it=True, length=20, leave=True, f
                 time_est= time_est.format(elapsed*(n_iter-i)/i) if time_it and i>0 else '')
             full_bar += ' '*(max(last_size - len(full_bar), 0))
             barit.logger.info(full_bar)
-            barit.logger.handlers[0].flush()
             return len(full_bar)
         
         last_len = print_bar(0, 0)
@@ -64,7 +63,6 @@ def barit(iterable, start=None, end=None, time_it=True, length=20, leave=True, f
             last_len = print_bar(i_iter, last_len)
 
         barit.logger.info('\n' if leave else '\r'+' '*last_len + '\r')
-        barit.logger.handlers[0].flush()
 
 
 barit.silent = False
