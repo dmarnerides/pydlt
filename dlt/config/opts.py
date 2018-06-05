@@ -164,7 +164,7 @@ def parse(verbose=False):
     
     # Create an event log file
     if opt.create_log:
-        logfile = os.path.join(opt.save_path, 'dlt.out.log')
+        logfile = os.path.join(opt.save_path, opt.log_name)
         DuplStdOut(logfile)
 
     # Print all arguments 
@@ -205,7 +205,7 @@ parse.optimizers = ['adam', 'sgd', 'adadelta', 'adagrad', 'sparseadam', 'adamax'
 
 parse.param_dict = {
     'dlt': [dict(flags=['--create_log'], type=str2bool, default=True, help='Output all std_out to a log file.'),
-            ],
+            dict(flags=['--log_name'], default='dlt.log', help='Name of log_file')],
     'general': [dict(flags=['--experiment_name'], default='', help='Name of experiment'),
                  dict(flags=['--save_path'], type=partial(process, create=True), default='.', help='Root directory for experiments'),
                  dict(flags=['--seed'], type=int, default=None, help='Seed for random number generation.'),
