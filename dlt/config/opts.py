@@ -5,60 +5,7 @@ import logging
 from functools import partial
 from ..util.paths import process
 from ..util import str2bool
-
-# From 
-# https://stackoverflow.com/questions/1741972/how-to-use-different-formatters-with-the-same-logging-handler-in-python
-class DispatchingFormatter:
-    def __init__(self, formatters, default_formatter):
-        self._formatters = formatters
-        self._default_formatter = default_formatter
-
-    def format(self, record):
-        formatter = self._formatters.get(record.name, self._default_formatter)
-        return formatter.format(record)
-
-# Helper logger for outputting sys.stdout to a logfile
-class DuplStdOut(object):
-    def __init__(self, filename):
-        self.stdout = sys.stdout
-        
-        self.logger = logging.getLogger('dlt_file_log')
-        self.logger.setLevel(logging.INFO)
-        self.logger.propagate = False
-        file_handler = logging.FileHandler(filename)
-        formatter = logging.Formatter('{message}', style='{')
-        
-        # Keep the formatting of the dlt logger
-        file_handler.setFormatter(DispatchingFormatter({
-                'dlt_file_log': formatter,
-                'dlt': logging.getLogger('dlt').handlers[0].formatter,
-                'dlt.barit': logging.getLogger('dlt.barit').handlers[0].formatter,
-            },
-            formatter,
-        ))
-        self.logger.addHandler(file_handler)
-        
-        # also add the file handler to dlt logger and to the barit logger
-        logging.getLogger('dlt').addHandler(file_handler)
-        logging.getLogger('dlt.barit').addHandler(file_handler)
-        
-        sys.stdout = self
- 
-    def __del__(self):
-        if self.stdout is not None:
-            sys.stdout = self.stdout
-            self.stdout = None
-
-    def write(self, msg):
-        if msg != os.linesep:
-            self.logger.info("'" + msg + "'")
-        self.stdout.write(msg)
-        self.flush()
-
-    def flush(self):
-        self.stdout.flush()
-        for h in self.logger.handlers:
-            h.flush()
+from .helpers import DuplStdOut
 
 # This is to allow commented lines in the configuration files
 def _convert_arg_line_to_args(line):
@@ -132,7 +79,7 @@ def add_extras(extras):
         arguments in the argparse_ package `add_argument` function.
 
         .. _argparse: https://docs.python.org/3/library/argparse.html
-
+DuplStdOut
     Warning:
         The parser takes strings as inputs, so passing 'False' at the command
         for a bool argument, it will be converted to *True*. Instead of using
@@ -214,7 +161,7 @@ def parse(verbose=False):
     
     # Create an event log file
     if opt.create_log:
-        logfile = os.path.join(opt.save_path, 'dlt.log')
+        logfile = os.path.join(opt.save_path, 'dlt.out.log')
         DuplStdOut(logfile)
 
     # Print all arguments 
