@@ -5,7 +5,7 @@ import logging
 import subprocess
 from functools import partial
 from ..util import paths
-from ..util.paths import process
+from ..util.paths import process, write_file
 from ..util import str2bool
 from .helpers import DuplStdOut
 
@@ -179,7 +179,7 @@ def parse(verbose=False):
     git_hash_file = os.path.join(opt.save_path, '.githash')
     if git_hash is not None:
         if not os.path.isfile(settings_file):
-            dlt.util.paths.write_file(git_hash, git_hash_file)
+            write_file(git_hash, git_hash_file)
         else:
             with open(git_hash_file, 'r') as f:
                 old_git_hash = f.read()
@@ -206,7 +206,7 @@ def parse(verbose=False):
     # Save arguments to file (only once)
     settings_file = os.path.join(opt.save_path, 'settings.cfg')
     if not os.path.isfile(settings_file):
-        dlt.util.paths.write_file('\n'.join([ make_entry(key,val) for key, val in opts.__dict__.items()]), settings_file)
+        write_file('\n'.join([ make_entry(key,val) for key, val in opts.__dict__.items()]), settings_file)
 
     parse.opt = opt
     return opt
