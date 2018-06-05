@@ -178,7 +178,7 @@ def parse(verbose=False):
     git_hash = get_git_hash()
     git_hash_file = os.path.join(opt.save_path, '.githash')
     if git_hash is not None:
-        if not os.path.isfile(settings_file):
+        if not os.path.isfile(git_hash_file):
             write_file(git_hash, git_hash_file)
         else:
             with open(git_hash_file, 'r') as f:
