@@ -18,7 +18,8 @@ def make_entry(key, val):
 
 def get_git_hash():
     try:
-        git_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).rstrip().decode("utf-8")
+        with open(os.devnull, 'w') as devnull:
+            git_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], stderr=devnull).rstrip().decode("utf-8")
         return git_hash
     except:
         return None
