@@ -1,5 +1,6 @@
 import sys
 import time
+import logging
 
 def barit(iterable, start=None, end=None, time_it=True, length=20, leave=True, filler='='):
     """Minimal progress bar for iterables.
@@ -53,8 +54,8 @@ def barit(iterable, start=None, end=None, time_it=True, length=20, leave=True, f
                 elapsed_est=elapsed_est.format(elapsed),
                 time_est= time_est.format(elapsed*(n_iter-i)/i) if time_it and i>0 else '')
             full_bar += ' '*(max(last_size - len(full_bar), 0))
-            sys.stdout.write(full_bar)
-            sys.stdout.flush()
+            barit.logger.info(full_bar)
+            barit.logger.handlers[0].flush()
             return len(full_bar)
         
         last_len = print_bar(0, 0)
@@ -62,7 +63,15 @@ def barit(iterable, start=None, end=None, time_it=True, length=20, leave=True, f
             yield x
             last_len = print_bar(i_iter, last_len)
 
-        sys.stdout.write('\n' if leave else '\r'+' '*last_len + '\r')
-        sys.stdout.flush()
+        barit.logger.info('\n' if leave else '\r'+' '*last_len + '\r')
+        barit.logger.handlers[0].flush()
+
 
 barit.silent = False
+barit.logger = logging.getLogger('dlt.barit')
+barit.logger.setLevel(logging.INFO)
+barit.logger.propagate = False
+sh = logging.StreamHandler()
+sh.terminator = ""
+sh.setFormatter(logging.Formatter('{message}', style='{'))
+barit.logger.addHandler(sh)
