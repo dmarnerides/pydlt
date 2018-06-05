@@ -174,6 +174,12 @@ def parse(verbose=False):
                         if key not in ['flag', 'flags']})
     opt = parser.parse_args()
 
+    # Add experiment name to path and create the directory
+    if opt.experiment_name != '':
+        opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
+    paths.make(opt.save_path)
+
+
     # Manage git hashes and print message
     git_hash = get_git_hash()
     git_hash_file = os.path.join(opt.save_path, '.githash')
@@ -188,10 +194,9 @@ def parse(verbose=False):
                 logging.getLogger('dlt').warning(hash_warn)
 
 
-    if opt.experiment_name != '':
-        opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
     
-    paths.make(opt.save_path)
+    
+    
     
 
     # Create an event log file
