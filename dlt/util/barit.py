@@ -73,5 +73,5 @@ barit.logger.setLevel(logging.INFO)
 barit.logger.propagate = False
 sh = logging.StreamHandler()
 sh.terminator = ""
-sh.setFormatter(logging.Formatter('{message}\r', style='{'))
+sh.setFormatter(logging.Formatter('{message}', style='{'))
 barit.logger.addHandler(sh)
