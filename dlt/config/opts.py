@@ -3,6 +3,7 @@ import sys
 import argparse
 import logging
 from functools import partial
+from ..util import paths
 from ..util.paths import process
 from ..util import str2bool
 from .helpers import DuplStdOut
@@ -158,6 +159,8 @@ def parse(verbose=False):
     opt = parser.parse_args()
     if opt.experiment_name != '':
         opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
+    
+    paths.make(opt.save_path)
     
     # Create an event log file
     if opt.create_log:
