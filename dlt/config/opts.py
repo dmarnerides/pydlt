@@ -154,7 +154,6 @@ def parse(verbose=False):
         if category in parse.subsets:
             for subset in parse.subsets[category]:
                 for p in params:
-                    
                     if 'help' in p:
                         help_str = p['help'] + ' ({0})'.format(subset)
                     

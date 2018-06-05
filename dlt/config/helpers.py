@@ -7,8 +7,7 @@ class CustomFileHandler(logging.FileHandler):
     def emit(self, record):
         try:
             msg = self.format(record)
-            stream = self.stream
-            stream.write(msg)
+            self.stream.write(msg)
         except Exception:
             self.handleError(record)
 
@@ -34,19 +33,17 @@ class DuplStdOut(object):
         file_handler = CustomFileHandler(filename)
         formatter = logging.Formatter('{message}', style='{')
         
-        # Keep the formatting of the dlt and dlt.barit loggers
+        # Keep the formatting of the dlt logger
         file_handler.setFormatter(DispatchingFormatter({
                 'dlt_file_log': formatter,
-                'dlt': logging.getLogger('dlt').handlers[0].formatter,
-                'dlt.barit': logging.getLogger('dlt.barit').handlers[0].formatter,
+                'dlt': logging.getLogger('dlt').handlers[0].formatter
             },
             formatter,
         ))
         self.logger.addHandler(file_handler)
         
-        # also add the file handler to dlt logger and to the barit logger
+        # also add the file handler to dlt logger
         logging.getLogger('dlt').addHandler(file_handler)
-        logging.getLogger('dlt.barit').addHandler(file_handler)
         
         sys.stdout = self
  
