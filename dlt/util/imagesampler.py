@@ -88,7 +88,7 @@ class ImageSampler(object):
         self.sample(imgs)
 
     def _make_name(self):
-        tmpl = '{0}{1:07d}{2}'
+        tmpl = '{0}_{1:07d}{2}'
         fname = tmpl.format(self.name, self.counter, self.ext)
         self.filename = path.join(self.directory, fname)
         return self.filename
