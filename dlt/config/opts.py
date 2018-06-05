@@ -182,6 +182,13 @@ def parse(verbose=False):
     # Create an event log file
     if opt.create_log:
         logfile = os.path.join(opt.save_path, opt.log_name)
+        count = 1
+        while True:
+            if os.path.isfile(logfile):
+                logfile = os.path.join(opt.save_path, '{0}.{1}'.format(opt.log_name, count))
+                count += 1
+            else:
+                break
         DuplStdOut(logfile)
 
     # Manage git hashes and print message
