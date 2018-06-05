@@ -79,7 +79,7 @@ class ImageSampler(object):
                 torch.save((self.counter, new_filename), self.chkp)
             if self.display_samples:
                 self.figure = imshow(samples, interactive=True,
-                                     title=self._make_name(), 
+                                     title=os.path.basename(self._make_name()), 
                                      figure=self.figure, view='cv')
         
 
