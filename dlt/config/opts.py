@@ -206,7 +206,7 @@ def parse(verbose=False):
     # Save arguments to file (only once)
     settings_file = os.path.join(opt.save_path, 'settings.cfg')
     if not os.path.isfile(settings_file):
-        write_file('\n'.join([ make_entry(key,val) for key, val in opts.__dict__.items()]), settings_file)
+        write_file('\n'.join([ make_entry(key,val) for key, val in opt.__dict__.items()]), settings_file)
 
     parse.opt = opt
     return opt
