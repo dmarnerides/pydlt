@@ -2,11 +2,27 @@ import os
 import sys
 import argparse
 import logging
+import subprocess
 from functools import partial
 from ..util import paths
 from ..util.paths import process
 from ..util import str2bool
 from .helpers import DuplStdOut
+
+# Makes an entry for the saved settings file
+def make_entry(key, val):
+    if any([isinstance(val, x) for x in [list, tuple]]):
+        return '--' + key + ' ' + ' '.join([str(x) for x in val])
+    else:
+        return '--' + key + ' ' + str(val)
+
+def get_git_hash():
+    try:
+        git_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD']).rstrip().decode("utf-8")
+        return git_hash
+    except:
+        return None
+
 
 # This is to allow commented lines in the configuration files
 def _convert_arg_line_to_args(line):
@@ -157,20 +173,41 @@ def parse(verbose=False):
                     **{key: val for key, val in p.items() 
                         if key not in ['flag', 'flags']})
     opt = parser.parse_args()
+
+    # Manage git hashes and print message
+    git_hash = get_git_hash()
+    git_hash_file = os.path.join(opt.save_path, '.githash')
+    if git_hash is not None:
+        if not os.path.isfile(settings_file):
+            dlt.util.paths.write_file(git_hash, git_hash_file)
+        else:
+            with open(git_hash_file, 'r') as f:
+                old_git_hash = f.read()
+            if old_git_hash != git_hash:
+                hash_warn = 'Current git hash ({0}) does not match the one used to generate the save directory ({1})\n'
+                logging.getLogger('dlt').warning(hash_warn)
+
+
     if opt.experiment_name != '':
         opt.save_path = os.path.join(opt.save_path, opt.experiment_name)
     
     paths.make(opt.save_path)
     
+
     # Create an event log file
     if opt.create_log:
         logfile = os.path.join(opt.save_path, opt.log_name)
         DuplStdOut(logfile)
 
     # Print all arguments 
-
     if verbose:
         print_opts(opt)
+    
+    # Save arguments to file (only once)
+    settings_file = os.path.join(opt.save_path, 'settings.cfg')
+    if not os.path.isfile(settings_file):
+        dlt.util.paths.write_file('\n'.join([ make_entry(key,val) for key, val in opts.__dict__.items()]), settings_file)
+
     parse.opt = opt
     return opt
 
