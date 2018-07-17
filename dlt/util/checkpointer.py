@@ -120,11 +120,12 @@ class Checkpointer(object):
         torch.save(self._get_state(obj), new_filename, *args, **kwargs)
         torch.save((self.counter,new_filename) , self.chkp)
 
-    def load(self, obj=None, *args, **kwargs):
+    def load(self, obj=None, preprocess=None, *args, **kwargs):
         """Loads a checkpoint from disk.
 
         Args:
             obj (optional): Needed if we load the `state_dict` of an `nn.Module`.
+            preprocess (optional): Callable to preprocess the loaded object.
             args: Arguments to pass to `torch.load`.
             kwargs: Keyword arguments to pass to `torch.load`.
             
@@ -133,7 +134,9 @@ class Checkpointer(object):
 
         """
         if self.counter > 0:
-            obj = self._set_state(obj, torch.load(
-                self.filename, *args, **kwargs))
+            loaded =  torch.load(self.filename, *args, **kwargs)
+            if preprocess is not None:
+                loaded = preprocess(loaded)
+            obj = self._set_state(obj,loaded)
             self._say("Loaded {0} checkpoint: {1}".format(self.name, self.filename))
         return obj
