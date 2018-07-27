@@ -1,3 +1,4 @@
+from itertools import chain
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, LambdaLR
 from ..util import Checkpointer
@@ -29,7 +30,7 @@ def optimizer(model, extra_params=None, subset=None):
 
     grad_params = filter(lambda p: p.requires_grad, model.parameters())
     if extra_params is not None:
-        grad_params += filter(lambda p: p.requires_grad, extra_params)
+        grad_params = chain(grad_params, filter(lambda p: p.requires_grad, extra_params))
 
     if opts.optimizer == 'adam':
         ret_optimizer = torch.optim.Adam(grad_params, lr=opts.lr, 
