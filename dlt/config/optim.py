@@ -3,11 +3,12 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau, StepLR, LambdaLR
 from ..util import Checkpointer
 from .opts import fetch_opts, parse
 
-def optimizer(model, subset=None):
+def optimizer(model, extra_params=None, subset=None):
     """Returns the optimizer for the given model.
     
     Args:
         model (nn.Module): The network for the optimizer.
+        extra_params (list, optional): Extra parameters to pass to the optimizer.
         subset (string, optional): Specifies the subset of the relevant
             categories, if any of them was split (default, None).
 
@@ -27,6 +28,9 @@ def optimizer(model, subset=None):
         raise ValueError('Optimizer {0} not available.'.format(opts.optimizer))
 
     grad_params = filter(lambda p: p.requires_grad, model.parameters())
+    if extra_params is not None:
+        grad_params += extra_params
+
     if opts.optimizer == 'adam':
         ret_optimizer = torch.optim.Adam(grad_params, lr=opts.lr, 
             betas=(opts.beta1, opts.beta2), weight_decay=opts.weight_decay)
