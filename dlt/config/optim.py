@@ -8,7 +8,7 @@ def optimizer(model, extra_params=None, subset=None):
     
     Args:
         model (nn.Module): The network for the optimizer.
-        extra_params (list, optional): Extra parameters to pass to the optimizer.
+        extra_params (generator, optional): Extra parameters to pass to the optimizer.
         subset (string, optional): Specifies the subset of the relevant
             categories, if any of them was split (default, None).
 
@@ -29,7 +29,7 @@ def optimizer(model, extra_params=None, subset=None):
 
     grad_params = filter(lambda p: p.requires_grad, model.parameters())
     if extra_params is not None:
-        grad_params += extra_params
+        grad_params += filter(lambda p: p.requires_grad, extra_params)
 
     if opts.optimizer == 'adam':
         ret_optimizer = torch.optim.Adam(grad_params, lr=opts.lr, 
